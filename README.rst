@@ -1,6 +1,6 @@
 Python Version Library
 ======================
-|Status|_ |Badge|_ |Downloads|_ |Egg|_ |Wheel|_ |License|_
+|Status|_ |Downloads|_ |Badge|_ |Egg|_ |Wheel|_ |License|_
 
 .. |Badge| image:: https://pypip.in/v/pyversion/badge.png
 .. _Badge: https://pypi.python.org/pypi/pyversion/
