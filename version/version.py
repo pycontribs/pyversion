@@ -23,7 +23,7 @@ import email
 import subprocess
 import itertools
 import operator
-
+import warnings
 import pkg_resources
 
 TRUE_VALUES = ('true', '1', 'yes')
@@ -334,9 +334,9 @@ class VersionUtils(object):
             pass
         if version:
             return version
-    
-        raise Exception("Versioning for this project requires either an sdist"
-                        " tarball, or access to an upstream git repository.")
+        
+        warnings.warn("Versioning for this project requires an sdist, tarball, or access to an upstream git repository.  Defaulting the version to 0.0.0")
+        return "0.0.0"
 
 
 class SemanticVersion(object):
