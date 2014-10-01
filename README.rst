@@ -1,7 +1,5 @@
-===================
 Python Version Library
-===================
-
+======================
 |Status|_ |Badge|_ |Downloads|_ |Egg|_ |Wheel|_ |License|_
 
 .. |Badge| image:: https://pypip.in/v/pyversion/badge.png
@@ -21,19 +19,17 @@ Python package versioning made simple
 
 Quickstart
 ----------
-
 Feeling impatient? I like your style.
 
 ::
 
         from version import Version
-
+        
         __version__ = Version('project-name') #Version will be auto calculated
-
+        
         python setup.py tag register sdist upload
 
 
 Installation
-~~~~~~~~~~~~
-
+------------
 Download and install using `pip install pyversion` or `easy_install pyversion`
