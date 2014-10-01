@@ -8,9 +8,9 @@ Python Version Library
 .. _Downloads: https://pypi.python.org/pypi/pyversion/
 .. |Egg| image:: https://pypip.in/egg/pyversion/badge.png
 .. _Egg: https://pypi.python.org/pypi/pyversion/
-.. |Wheel| image:: https://pypip.in/d/pyversion/badge.png
+.. |Wheel| image:: https://pypip.in/wheel/pyversion/badge.png
 .. _Wheel: https://pypi.python.org/pypi/pyversion/
-.. |License| image:: https://pypip.in/d/pyversion/badge.png
+.. |License| image:: https://pypip.in/license/pyversion/badge.png
 .. _License: https://pypi.python.org/pypi/pyversion/
 .. |Status| image:: http://jenkins.rocktavious.com/buildStatus/icon?job=pyversion-master
 .. _Status: http://jenkins.rocktavious.com/job/pyversion-master/
