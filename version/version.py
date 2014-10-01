@@ -335,8 +335,8 @@ class VersionUtils(object):
         if version:
             return version
         
-        warnings.warn("Versioning for this project requires an sdist, tarball, or access to an upstream git repository.  Defaulting the version to 0.0.0")
-        return "0.0.0"
+        warnings.warn("Versioning for this project requires an sdist, tarball, or access to an upstream git repository.  Defaulting the version to 0.0.1")
+        return "0.0.1"
 
 
 class SemanticVersion(object):

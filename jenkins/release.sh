@@ -11,5 +11,5 @@ fi
 
 if [[ -e "./setup.py" ]]
 then
-  python setup.py register -r ${PYPI_NAME} sdist bdist_egg bdist_wheel upload -r ${PYPI_NAME}
+  python setup.py tag register -r ${PYPI_NAME} sdist bdist_egg bdist_wheel upload -r ${PYPI_NAME}
 fi
