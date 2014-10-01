@@ -35,296 +35,308 @@ def _is_int(string):
     except ValueError:
         return False
     
-def _get_boolean_option(option_dict, option_name, env_name):
-    return ((option_name in option_dict
-             and option_dict[option_name][1].lower() in TRUE_VALUES) or
-            str(os.getenv(env_name)).lower() in TRUE_VALUES)
+class VersionUtils(object):
+    @staticmethod
+    def get_boolean_option(option_dict, option_name, env_name):
+        return ((option_name in option_dict
+                 and option_dict[option_name][1].lower() in TRUE_VALUES) or
+                str(os.getenv(env_name)).lower() in TRUE_VALUES)
     
-def _iter_log_oneline(git_dir=None, option_dict=None):
-    """Iterate over --oneline log entries if possible.
-
-    This parses the output into a structured form but does not apply
-    presentation logic to the output - making it suitable for different
-    uses.
-
-    :return: An iterator of (hash, tags_set, 1st_line) tuples, or None if
-        changelog generation is disabled / not available.
-    """
-    if not option_dict:
-        option_dict = {}
-    should_skip = _get_boolean_option(option_dict, 'skip_changelog',
-                                     'SKIP_WRITE_GIT_CHANGELOG')
-    if should_skip:
-        return
-    if git_dir is None:
-        git_dir = _get_git_directory()
-    if not git_dir:
-        return
-    return _iter_log_inner(git_dir)
-
-
-def _iter_log_inner(git_dir):
-    """Iterate over --oneline log entries.
-
-    This parses the output intro a structured form but does not apply
-    presentation logic to the output - making it suitable for different
-    uses.
-
-    :return: An iterator of (hash, tags_set, 1st_line) tuples.
-    """
-    log_cmd = ['log', '--oneline', '--decorate']
-    changelog = _run_git_command(log_cmd, git_dir)
-    for line in changelog.split('\n'):
-        line_parts = line.split()
-        if len(line_parts) < 2:
-            continue
-        # Tags are in a list contained in ()'s. If a commit
-        # subject that is tagged happens to have ()'s in it
-        # this will fail
-        if line_parts[1].startswith('(') and ')' in line:
-            msg = line.split(')')[1].strip()
-        else:
-            msg = " ".join(line_parts[1:])
-
-        if "tag:" in line:
-            tags = set([
-                tag.split(",")[0]
-                for tag in line.split(")")[0].split("tag: ")[1:]])
-        else:
-            tags = set()
-
-        yield line_parts[0], tags, msg
+    @staticmethod
+    def iter_log_inner(git_dir):
+        """Iterate over --oneline log entries.
     
-def _run_git_command(cmd, git_dir, **kwargs):
-    if not isinstance(cmd, (list, tuple)):
-        cmd = [cmd]
-    return _run_shell_command(
-        ['git', '--git-dir=%s' % git_dir] + cmd, **kwargs)
-
-
-def _run_shell_command(cmd, throw_on_error=False, buffer=True, env=None):
-    if buffer:
-        out_location = subprocess.PIPE
-        err_location = subprocess.PIPE
-    else:
-        out_location = None
-        err_location = None
-
-    newenv = os.environ.copy()
-    if env:
-        newenv.update(env)
-
-    output = subprocess.Popen(cmd,
-                              stdout=out_location,
-                              stderr=err_location,
-                              env=newenv)
-    out = output.communicate()
-    if output.returncode and throw_on_error:
-        raise Exception("%s returned %d" % (cmd, output.returncode))
-    if len(out) == 0 or not out[0] or not out[0].strip():
-        return ''
-    return out[0].strip().decode('utf-8')
-
-def _get_increment_kwargs(git_dir, tag):
-    """Calculate the sort of semver increment needed from git history.
-
-    Every commit from HEAD to tag is consider for Sem-Ver metadata lines.
-
-    :return: a dict of kwargs for passing into SemanticVersion.increment.
-    """
-    result = {}
-    if tag:
-        version_spec = tag + "..HEAD"
-    else:
-        version_spec = "HEAD"
-    changelog = _run_git_command(['log', version_spec], git_dir)
-    header_len = len('    sem-ver:')
-    commands = [line[header_len:].strip() for line in changelog.split('\n')
-                if line.lower().startswith('    sem-ver:')]
-    symbols = set()
-    for command in commands:
-        symbols.update([symbol.strip() for symbol in command.split(',')])
-
-    def _handle_symbol(symbol, symbols, impact):
-        if symbol in symbols:
-            result[impact] = True
-            symbols.discard(symbol)
-    _handle_symbol('bugfix', symbols, 'patch')
-    _handle_symbol('feature', symbols, 'minor')
-    _handle_symbol('deprecation', symbols, 'minor')
-    _handle_symbol('api-break', symbols, 'major')
-    # We don't want patch in the kwargs since it is not a keyword argument -
-    # its the default minimum increment.
-    result.pop('patch', None)
-    return result
-
-def _get_git_directory():
-    return _run_shell_command(['git', 'rev-parse', '--git-dir'])
-
-def _git_is_installed():
-    try:
-        # We cannot use 'which git' as it may not be available
-        # in some distributions, So just try 'git --version'
-        # to see if we run into trouble
-        _run_shell_command(['git', '--version'])
-    except OSError:
-        return False
-    return True
-
-def _get_revno_and_last_tag(git_dir):
-    """Return the commit data about the most recent tag.
-
-    We use git-describe to find this out, but if there are no
-    tags then we fall back to counting commits since the beginning
-    of time.
-    """
-    changelog = _iter_log_oneline(git_dir=git_dir)
-    row_count = 0
-    for row_count, (ignored, tag_set, ignored) in enumerate(changelog):
-        version_tags = set()
-        for tag in list(tag_set):
-            try:
-                version_tags.add(SemanticVersion.from_pip_string(tag))
-            except Exception:
-                pass
-        if version_tags:
-            return max(version_tags).release_string(), row_count
-    return "", row_count
-
-def _get_version_from_git_target(git_dir, target_version):
-    """Calculate a version from a target version in git_dir.
-
-    This is used for untagged versions only. A new version is calculated as
-    necessary based on git metadata - distance to tags, current hash, contents
-    of commit messages.
-
-    :param git_dir: The git directory we're working from.
-    :param target_version: If None, the last tagged version (or 0 if there are
-        no tags yet) is incremented as needed to produce an appropriate target
-        version following semver rules. Otherwise target_version is used as a
-        constraint - if semver rules would result in a newer version then an
-        exception is raised.
-    :return: A semver version object.
-    """
-    sha = _run_git_command(
-        ['log', '-n1', '--pretty=format:%h'], git_dir)
-    tag, distance = _get_revno_and_last_tag(git_dir)
-    last_semver = SemanticVersion.from_pip_string(tag or '0')
-    if distance == 0:
-        new_version = last_semver
-    else:
-        new_version = last_semver.increment(
-            **_get_increment_kwargs(git_dir, tag))
-    if target_version is not None and new_version > target_version:
-        raise ValueError(
-            "git history requires a target version of %(new)s, but target "
-            "version is %(target)s" %
-            dict(new=new_version, target=target_version))
-    if distance == 0:
-        return last_semver
-    if target_version is not None:
-        return target_version.to_dev(distance, sha)
-    else:
-        return new_version.to_dev(distance, sha)
-
-def _get_version_from_git(pre_version=None):
-    """Calculate a version string from git.
-
-    If the revision is tagged, return that. Otherwise calculate a semantic
-    version description of the tree.
-
-    The number of revisions since the last tag is included in the dev counter
-    in the version for untagged versions.
-
-    :param pre_version: If supplied use this as the target version rather than
-        inferring one from the last tag + commit messages.
-    """
-    git_dir = _get_git_directory()
-    if git_dir and _git_is_installed():
-        try:
-            tagged = _run_git_command(
-                ['describe', '--exact-match'], git_dir,
-                throw_on_error=True).replace('-', '.')
-            target_version = SemanticVersion.from_pip_string(tagged)
-        except Exception:
-            if pre_version:
-                # not released yet - use pre_version as the target
-                target_version = SemanticVersion.from_pip_string(
-                    pre_version)
+        This parses the output intro a structured form but does not apply
+        presentation logic to the output - making it suitable for different
+        uses.
+    
+        :return: An iterator of (hash, tags_set, 1st_line) tuples.
+        """
+        log_cmd = ['log', '--oneline', '--decorate']
+        changelog = VersionUtils.run_git_command(log_cmd, git_dir)
+        for line in changelog.split('\n'):
+            line_parts = line.split()
+            if len(line_parts) < 2:
+                continue
+            # Tags are in a list contained in ()'s. If a commit
+            # subject that is tagged happens to have ()'s in it
+            # this will fail
+            if line_parts[1].startswith('(') and ')' in line:
+                msg = line.split(')')[1].strip()
             else:
-                # not released yet - just calculate from git history
-                target_version = None
-        result = _get_version_from_git_target(git_dir, target_version)
-        return result.release_string()
-    # If we don't know the version, return an empty string so at least
-    # the downstream users of the value always have the same type of
-    # object to work with.
-    try:
-        return unicode()
-    except NameError:
-        return ''
-
-def _get_version_from_pkg_metadata(package_name):
-    """Get the version from package metadata if present.
-
-    This looks for PKG-INFO if present (for sdists), and if not looks
-    for METADATA (for wheels) and failing that will return None.
-    """
-    pkg_metadata_filenames = ['PKG-INFO', 'METADATA']
-    pkg_metadata = {}
-    for filename in pkg_metadata_filenames:
+                msg = " ".join(line_parts[1:])
+    
+            if "tag:" in line:
+                tags = set([
+                    tag.split(",")[0]
+                    for tag in line.split(")")[0].split("tag: ")[1:]])
+            else:
+                tags = set()
+    
+            yield line_parts[0], tags, msg
+            
+    @staticmethod
+    def iter_log_oneline(git_dir=None, option_dict=None):
+        """Iterate over --oneline log entries if possible.
+    
+        This parses the output into a structured form but does not apply
+        presentation logic to the output - making it suitable for different
+        uses.
+    
+        :return: An iterator of (hash, tags_set, 1st_line) tuples, or None if
+            changelog generation is disabled / not available.
+        """
+        if not option_dict:
+            option_dict = {}
+        should_skip = VersionUtils.get_boolean_option(option_dict, 'skip_changelog',
+                                         'SKIP_WRITE_GIT_CHANGELOG')
+        if should_skip:
+            return
+        if git_dir is None:
+            git_dir = VersionUtils.get_git_directory()
+        if not git_dir:
+            return
+        return VersionUtils.iter_log_inner(git_dir)    
+    
+    @staticmethod
+    def run_shell_command(cmd, throw_on_error=False, buffer=True, env=None):
+        if buffer:
+            out_location = subprocess.PIPE
+            err_location = subprocess.PIPE
+        else:
+            out_location = None
+            err_location = None
+    
+        newenv = os.environ.copy()
+        if env:
+            newenv.update(env)
+    
+        output = subprocess.Popen(cmd,
+                                  stdout=out_location,
+                                  stderr=err_location,
+                                  env=newenv)
+        out = output.communicate()
+        if output.returncode and throw_on_error:
+            raise Exception("%s returned %d" % (cmd, output.returncode))
+        if len(out) == 0 or not out[0] or not out[0].strip():
+            return ''
+        return out[0].strip().decode('utf-8')
+    
+    @staticmethod
+    def run_git_command(cmd, git_dir, **kwargs):
+        if not isinstance(cmd, (list, tuple)):
+            cmd = [cmd]
+        return VersionUtils.run_shell_command(
+            ['git', '--git-dir=%s' % git_dir] + cmd, **kwargs)    
+    
+    @staticmethod
+    def get_increment_kwargs(git_dir, tag):
+        """Calculate the sort of semver increment needed from git history.
+    
+        Every commit from HEAD to tag is consider for Sem-Ver metadata lines.
+    
+        :return: a dict of kwargs for passing into SemanticVersion.increment.
+        """
+        result = {}
+        if tag:
+            version_spec = tag + "..HEAD"
+        else:
+            version_spec = "HEAD"
+        changelog = VersionUtils.run_git_command(['log', version_spec], git_dir)
+        header_len = len('    sem-ver:')
+        commands = [line[header_len:].strip() for line in changelog.split('\n')
+                    if line.lower().startswith('    sem-ver:')]
+        symbols = set()
+        for command in commands:
+            symbols.update([symbol.strip() for symbol in command.split(',')])
+    
+        def _handle_symbol(symbol, symbols, impact):
+            if symbol in symbols:
+                result[impact] = True
+                symbols.discard(symbol)
+        _handle_symbol('bugfix', symbols, 'patch')
+        _handle_symbol('feature', symbols, 'minor')
+        _handle_symbol('deprecation', symbols, 'minor')
+        _handle_symbol('api-break', symbols, 'major')
+        # We don't want patch in the kwargs since it is not a keyword argument -
+        # its the default minimum increment.
+        result.pop('patch', None)
+        return result
+    
+    @staticmethod
+    def get_git_directory():
+        return VersionUtils.run_shell_command(['git', 'rev-parse', '--git-dir'])
+    
+    @staticmethod
+    def git_is_installed():
         try:
-            pkg_metadata_file = open(filename, 'r')
-        except (IOError, OSError):
-            continue
+            # We cannot use 'which git' as it may not be available
+            # in some distributions, So just try 'git --version'
+            # to see if we run into trouble
+            VersionUtils.run_shell_command(['git', '--version'])
+        except OSError:
+            return False
+        return True
+    
+    @staticmethod
+    def get_revno_and_last_tag(git_dir):
+        """Return the commit data about the most recent tag.
+    
+        We use git-describe to find this out, but if there are no
+        tags then we fall back to counting commits since the beginning
+        of time.
+        """
+        changelog = VersionUtils.iter_log_oneline(git_dir=git_dir)
+        row_count = 0
+        for row_count, (ignored, tag_set, ignored) in enumerate(changelog):
+            version_tags = set()
+            for tag in list(tag_set):
+                try:
+                    version_tags.add(SemanticVersion.from_pip_string(tag))
+                except Exception:
+                    pass
+            if version_tags:
+                return max(version_tags).release_string(), row_count
+        return "", row_count
+    
+    @staticmethod
+    def get_version_from_git_target(git_dir, target_version):
+        """Calculate a version from a target version in git_dir.
+    
+        This is used for untagged versions only. A new version is calculated as
+        necessary based on git metadata - distance to tags, current hash, contents
+        of commit messages.
+    
+        :param git_dir: The git directory we're working from.
+        :param target_version: If None, the last tagged version (or 0 if there are
+            no tags yet) is incremented as needed to produce an appropriate target
+            version following semver rules. Otherwise target_version is used as a
+            constraint - if semver rules would result in a newer version then an
+            exception is raised.
+        :return: A semver version object.
+        """
+        sha = VersionUtils.run_git_command(
+            ['log', '-n1', '--pretty=format:%h'], git_dir)
+        tag, distance = VersionUtils.get_revno_and_last_tag(git_dir)
+        last_semver = SemanticVersion.from_pip_string(tag or '0')
+        if distance == 0:
+            new_version = last_semver
+        else:
+            new_version = last_semver.increment(
+                **VersionUtils.get_increment_kwargs(git_dir, tag))
+        if target_version is not None and new_version > target_version:
+            raise ValueError(
+                "git history requires a target version of %(new)s, but target "
+                "version is %(target)s" %
+                dict(new=new_version, target=target_version))
+        if distance == 0:
+            return last_semver
+        if target_version is not None:
+            return target_version.to_dev(distance, sha)
+        else:
+            return new_version.to_dev(distance, sha)
+    
+    @staticmethod
+    def get_version_from_git(pre_version=None):
+        """Calculate a version string from git.
+    
+        If the revision is tagged, return that. Otherwise calculate a semantic
+        version description of the tree.
+    
+        The number of revisions since the last tag is included in the dev counter
+        in the version for untagged versions.
+    
+        :param pre_version: If supplied use this as the target version rather than
+            inferring one from the last tag + commit messages.
+        """
+        git_dir = VersionUtils.get_git_directory()
+        if git_dir and _VersionUtils.git_is_installed():
+            try:
+                tagged = VersionUtils.run_git_command(
+                    ['describe', '--exact-match'], git_dir,
+                    throw_on_error=True).replace('-', '.')
+                target_version = SemanticVersion.from_pip_string(tagged)
+            except Exception:
+                if pre_version:
+                    # not released yet - use pre_version as the target
+                    target_version = SemanticVersion.from_pip_string(
+                        pre_version)
+                else:
+                    # not released yet - just calculate from git history
+                    target_version = None
+            result = VersionUtils.get_version_from_git_target(git_dir, target_version)
+            return result.release_string()
+        # If we don't know the version, return an empty string so at least
+        # the downstream users of the value always have the same type of
+        # object to work with.
         try:
-            pkg_metadata = email.message_from_file(pkg_metadata_file)
-        except email.MessageError:
-            continue
-
-    # Check to make sure we're in our own dir
-    if pkg_metadata.get('Name', None) != package_name:
-        return None
-    return pkg_metadata.get('Version', None)
-
-def _get_version(package_name, pre_version=None):
-    """Get the version of the project. First, try getting it from PKG-INFO or
-    METADATA, if it exists. If it does, that means we're in a distribution
-    tarball or that install has happened. Otherwise, if there is no PKG-INFO
-    or METADATA file, pull the version from git.
-
-    :param pre_version: The version field from setup.cfg - if set then this
-        version will be the next release.
-    """
-    version = os.environ.get("RELEASE_VERSION", None)
-    if version:
-        return version
-    version = _get_version_from_pkg_metadata(package_name)
-    if version:
-        return version
-    try:
-        version = _get_version_from_git(pre_version)
-        # Handle http://bugs.python.org/issue11638
-        # version will either be an empty unicode string or a valid
-        # unicode version string, but either way it's unicode and needs to
-        # be encoded.
-        if sys.version_info[0] == 2:
-            version = version.encode('utf-8')
-    except:
-        pass
-    if version:
-        return version
-    try:
-        requirement = pkg_resources.Requirement.parse(package_name)
-        provider = pkg_resources.get_provider(requirement)
-        version = provider.version
-    except:
-        pass
-    if version:
-        return version
-
-    raise Exception("Versioning for this project requires either an sdist"
-                    " tarball, or access to an upstream git repository.")
+            return unicode()
+        except NameError:
+            return ''
+    
+    @staticmethod
+    def get_version_from_pkg_metadata(package_name):
+        """Get the version from package metadata if present.
+    
+        This looks for PKG-INFO if present (for sdists), and if not looks
+        for METADATA (for wheels) and failing that will return None.
+        """
+        pkg_metadata_filenames = ['PKG-INFO', 'METADATA']
+        pkg_metadata = {}
+        for filename in pkg_metadata_filenames:
+            try:
+                pkg_metadata_file = open(filename, 'r')
+            except (IOError, OSError):
+                continue
+            try:
+                pkg_metadata = email.message_from_file(pkg_metadata_file)
+            except email.MessageError:
+                continue
+    
+        # Check to make sure we're in our own dir
+        if pkg_metadata.get('Name', None) != package_name:
+            return None
+        return pkg_metadata.get('Version', None)
+    
+    @staticmethod
+    def get_version(package_name, pre_version=None):
+        """Get the version of the project. First, try getting it from PKG-INFO or
+        METADATA, if it exists. If it does, that means we're in a distribution
+        tarball or that install has happened. Otherwise, if there is no PKG-INFO
+        or METADATA file, pull the version from git.
+    
+        :param pre_version: The version field from setup.cfg - if set then this
+            version will be the next release.
+        """
+        version = os.environ.get("RELEASE_VERSION", None)
+        if version:
+            return version
+        version = VersionUtils.get_version_from_pkg_metadata(package_name)
+        if version:
+            return version
+        try:
+            version = VersionUtils.get_version_from_git(pre_version)
+            # Handle http://bugs.python.org/issue11638
+            # version will either be an empty unicode string or a valid
+            # unicode version string, but either way it's unicode and needs to
+            # be encoded.
+            if sys.version_info[0] == 2:
+                version = version.encode('utf-8')
+        except:
+            pass
+        if version:
+            return version
+        try:
+            requirement = pkg_resources.Requirement.parse(package_name)
+            provider = pkg_resources.get_provider(requirement)
+            version = provider.version
+        except:
+            pass
+        if version:
+            return version
+    
+        raise Exception("Versioning for this project requires either an sdist"
+                        " tarball, or access to an upstream git repository.")
 
 
 class SemanticVersion(object):
@@ -714,7 +726,7 @@ class SemanticVersion(object):
 class Version(str):
     def __new__(self, package):
 
-        result_string = _get_version(package)
+        result_string = VersionUtils.get_version(package)
         semantic_version = SemanticVersion.from_pip_string(result_string)
         
         if os.environ.get('RELEASE_TYPE', False) :
@@ -732,4 +744,4 @@ class Version(str):
         return "Version({0}:{1})".format(self.package, self)
 
 
-__all__ = ['Version']
+__all__ = ['Version', 'VersionUtils']
