@@ -44,4 +44,5 @@ class tag(Command):
             logger.info('Adding tag {0} for commit {1}'.format(tag, sha))
             if not self.dry_run:
                 VersionUtils.run_git_command(['tag', '-m', '""', '--sign', tag, sha], self.git_dir, throw_on_error=True)
+                logger.info('Pushing tag {0} to remote {1}'.format(tag, self.remote))
                 VersionUtils.run_git_command(['push', self.remote, tag], self.git_dir, throw_on_error=True)

@@ -250,7 +250,7 @@ class VersionUtils(object):
             inferring one from the last tag + commit messages.
         """
         git_dir = VersionUtils.get_git_directory()
-        if git_dir and _VersionUtils.git_is_installed():
+        if git_dir and VersionUtils.git_is_installed():
             try:
                 tagged = VersionUtils.run_git_command(
                     ['describe', '--exact-match'], git_dir,
