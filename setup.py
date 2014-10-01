@@ -1,19 +1,11 @@
 from setuptools import setup, find_packages  # Always prefer setuptools over distutils
-from codecs import open  # To use a consistent encoding
-from os import path
 from version import Version
-
-here = path.abspath(path.dirname(__file__))
-
-# Get the long description from the relevant file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
 
 setup(
     name='pyversion',
     version=Version('pyversion'),
     description='Python package versioning made simple',
-    long_description=long_description,
+    long_description=open("README.rst").read(),
     url='https://github.com/rocktavious/pyversion',
     author='Kyle Rockman',
     author_email='kyle.rockman@mac.com',
