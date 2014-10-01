@@ -302,15 +302,27 @@ def _get_version(package_name, pre_version=None):
     version = _get_version_from_pkg_metadata(package_name)
     if version:
         return version
-    version = _get_version_from_git(pre_version)
-    # Handle http://bugs.python.org/issue11638
-    # version will either be an empty unicode string or a valid
-    # unicode version string, but either way it's unicode and needs to
-    # be encoded.
-    if sys.version_info[0] == 2:
-        version = version.encode('utf-8')
+    try:
+        version = _get_version_from_git(pre_version)
+        # Handle http://bugs.python.org/issue11638
+        # version will either be an empty unicode string or a valid
+        # unicode version string, but either way it's unicode and needs to
+        # be encoded.
+        if sys.version_info[0] == 2:
+            version = version.encode('utf-8')
+    except:
+        pass
     if version:
         return version
+    try:
+        requirement = pkg_resources.Requirement.parse(package_name)
+        provider = pkg_resources.get_provider(requirement)
+        version = provider.version
+    except:
+        pass
+    if version:
+        return version
+
     raise Exception("Versioning for this project requires either an sdist"
                     " tarball, or access to an upstream git repository.")
 
@@ -700,30 +712,24 @@ class SemanticVersion(object):
 
 
 class Version(str):
-    def __new__(self, content):
-        obj = str.__new__(self, '')
-        obj._package = content
-        try:
-            requirement = pkg_resources.Requirement.parse(self._package)
-            provider = pkg_resources.get_provider(requirement)
-            result_string = provider.version
-        except :
-            result_string = _get_version(self._package)
-        obj._version = SemanticVersion.from_pip_string(result_string)
-        
-        return obj
+    def __new__(self, package):
 
-    def __str__(self):
-        """Make the Version object behave like a string."""
+        result_string = _get_version(package)
+        semantic_version = SemanticVersion.from_pip_string(result_string)
+        
         if os.environ.get('RELEASE_TYPE', False) :
-            return self._semantic_version.brief_string()
+            version = str("{0}".format(semantic_version.brief_string()))
         else:
-            return self._semantic_version.release_string()  
+            version = str("{0}".format(semantic_version.release_string()))        
+        
+        obj = str.__new__(self, version)
+        obj.package = package
+        obj.semantic_version = semantic_version
+        return obj
 
     def __repr__(self):
         """Include the name."""
-        return "Version({0}:{1})".format(self._package,
-                                       self._semantic_version.brief_string())
+        return "Version({0}:{1})".format(self.package, self)
 
 
 __all__ = ['Version']
