@@ -1,0 +1,7 @@
+unittest2
+coverage
+nose
+nosexcover
+flake8
+pep8
+pyflakes

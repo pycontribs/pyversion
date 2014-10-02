@@ -28,28 +28,30 @@ import pkg_resources
 
 TRUE_VALUES = ('true', '1', 'yes')
 
+
 def _is_int(string):
     try:
         int(string)
         return True
     except ValueError:
         return False
-    
+
+
 class VersionUtils(object):
     @staticmethod
     def get_boolean_option(option_dict, option_name, env_name):
         return ((option_name in option_dict
                  and option_dict[option_name][1].lower() in TRUE_VALUES) or
                 str(os.getenv(env_name)).lower() in TRUE_VALUES)
-    
+
     @staticmethod
     def iter_log_inner(git_dir):
         """Iterate over --oneline log entries.
-    
+
         This parses the output intro a structured form but does not apply
         presentation logic to the output - making it suitable for different
         uses.
-    
+
         :return: An iterator of (hash, tags_set, 1st_line) tuples.
         """
         log_cmd = ['log', '--oneline', '--decorate']
@@ -65,39 +67,39 @@ class VersionUtils(object):
                 msg = line.split(')')[1].strip()
             else:
                 msg = " ".join(line_parts[1:])
-    
+
             if "tag:" in line:
                 tags = set([
                     tag.split(",")[0]
                     for tag in line.split(")")[0].split("tag: ")[1:]])
             else:
                 tags = set()
-    
+
             yield line_parts[0], tags, msg
-            
+
     @staticmethod
     def iter_log_oneline(git_dir=None, option_dict=None):
         """Iterate over --oneline log entries if possible.
-    
+
         This parses the output into a structured form but does not apply
         presentation logic to the output - making it suitable for different
         uses.
-    
+
         :return: An iterator of (hash, tags_set, 1st_line) tuples, or None if
             changelog generation is disabled / not available.
         """
         if not option_dict:
             option_dict = {}
         should_skip = VersionUtils.get_boolean_option(option_dict, 'skip_changelog',
-                                         'SKIP_WRITE_GIT_CHANGELOG')
+                                                      'SKIP_WRITE_GIT_CHANGELOG')
         if should_skip:
             return
         if git_dir is None:
             git_dir = VersionUtils.get_git_directory()
         if not git_dir:
             return
-        return VersionUtils.iter_log_inner(git_dir)    
-    
+        return VersionUtils.iter_log_inner(git_dir)
+
     @staticmethod
     def run_shell_command(cmd, throw_on_error=False, buffer=True, env=None):
         if buffer:
@@ -106,11 +108,11 @@ class VersionUtils(object):
         else:
             out_location = None
             err_location = None
-    
+
         newenv = os.environ.copy()
         if env:
             newenv.update(env)
-    
+
         output = subprocess.Popen(cmd,
                                   stdout=out_location,
                                   stderr=err_location,
@@ -121,20 +123,20 @@ class VersionUtils(object):
         if len(out) == 0 or not out[0] or not out[0].strip():
             return ''
         return out[0].strip().decode('utf-8')
-    
+
     @staticmethod
     def run_git_command(cmd, git_dir, **kwargs):
         if not isinstance(cmd, (list, tuple)):
             cmd = [cmd]
         return VersionUtils.run_shell_command(
-            ['git', '--git-dir=%s' % git_dir] + cmd, **kwargs)    
-    
+            ['git', '--git-dir=%s' % git_dir] + cmd, **kwargs)
+
     @staticmethod
     def get_increment_kwargs(git_dir, tag):
         """Calculate the sort of semver increment needed from git history.
-    
+
         Every commit from HEAD to tag is consider for Sem-Ver metadata lines.
-    
+
         :return: a dict of kwargs for passing into SemanticVersion.increment.
         """
         result = {}
@@ -149,7 +151,7 @@ class VersionUtils(object):
         symbols = set()
         for command in commands:
             symbols.update([symbol.strip() for symbol in command.split(',')])
-    
+
         def _handle_symbol(symbol, symbols, impact):
             if symbol in symbols:
                 result[impact] = True
@@ -162,11 +164,11 @@ class VersionUtils(object):
         # its the default minimum increment.
         result.pop('patch', None)
         return result
-    
+
     @staticmethod
     def get_git_directory():
         return VersionUtils.run_shell_command(['git', 'rev-parse', '--git-dir'])
-    
+
     @staticmethod
     def git_is_installed():
         try:
@@ -177,11 +179,11 @@ class VersionUtils(object):
         except OSError:
             return False
         return True
-    
+
     @staticmethod
     def get_revno_and_last_tag(git_dir):
         """Return the commit data about the most recent tag.
-    
+
         We use git-describe to find this out, but if there are no
         tags then we fall back to counting commits since the beginning
         of time.
@@ -198,15 +200,15 @@ class VersionUtils(object):
             if version_tags:
                 return max(version_tags).release_string(), row_count
         return "", row_count
-    
+
     @staticmethod
     def get_version_from_git_target(git_dir, target_version):
         """Calculate a version from a target version in git_dir.
-    
+
         This is used for untagged versions only. A new version is calculated as
         necessary based on git metadata - distance to tags, current hash, contents
         of commit messages.
-    
+
         :param git_dir: The git directory we're working from.
         :param target_version: If None, the last tagged version (or 0 if there are
             no tags yet) is incremented as needed to produce an appropriate target
@@ -235,17 +237,17 @@ class VersionUtils(object):
             return target_version.to_dev(distance, sha)
         else:
             return new_version.to_dev(distance, sha)
-    
+
     @staticmethod
     def get_version_from_git(pre_version=None):
         """Calculate a version string from git.
-    
+
         If the revision is tagged, return that. Otherwise calculate a semantic
         version description of the tree.
-    
+
         The number of revisions since the last tag is included in the dev counter
         in the version for untagged versions.
-    
+
         :param pre_version: If supplied use this as the target version rather than
             inferring one from the last tag + commit messages.
         """
@@ -273,11 +275,11 @@ class VersionUtils(object):
             return unicode()
         except NameError:
             return ''
-    
+
     @staticmethod
     def get_version_from_pkg_metadata(package_name):
         """Get the version from package metadata if present.
-    
+
         This looks for PKG-INFO if present (for sdists), and if not looks
         for METADATA (for wheels) and failing that will return None.
         """
@@ -292,19 +294,19 @@ class VersionUtils(object):
                 pkg_metadata = email.message_from_file(pkg_metadata_file)
             except email.MessageError:
                 continue
-    
+
         # Check to make sure we're in our own dir
         if pkg_metadata.get('Name', None) != package_name:
             return None
         return pkg_metadata.get('Version', None)
-    
+
     @staticmethod
     def get_version(package_name, pre_version=None):
         """Get the version of the project. First, try getting it from PKG-INFO or
         METADATA, if it exists. If it does, that means we're in a distribution
         tarball or that install has happened. Otherwise, if there is no PKG-INFO
         or METADATA file, pull the version from git.
-    
+
         :param pre_version: The version field from setup.cfg - if set then this
             version will be the next release.
         """
@@ -334,7 +336,7 @@ class VersionUtils(object):
             pass
         if version:
             return version
-        
+
         warnings.warn("Versioning for this project requires an sdist, tarball, or access to an upstream git repository.  Defaulting the version to 0.0.1")
         return "0.0.1"
 
@@ -472,8 +474,7 @@ class SemanticVersion(object):
         if digit_len == 0:
             raise ValueError("Invalid version %r" % version_string)
         elif digit_len < 3:
-            if (digit_len < len(input_components) and
-                    input_components[digit_len][0].isdigit()):
+            if (digit_len < len(input_components) and input_components[digit_len][0].isdigit()):
                 # Handle X.YaZ - Y is a digit not a leadin to pre-release.
                 mixed_component = input_components[digit_len]
                 last_component = ''.join(itertools.takewhile(
@@ -535,7 +536,7 @@ class SemanticVersion(object):
                         'Unknown remainder %r in %r'
                         % (remainder, version_string))
         if len(remainder) > 1:
-                githash = remainder[1][1:]
+            githash = remainder[1][1:]
         return SemanticVersion(
             major, minor, patch, prerelease_type=prerelease_type,
             prerelease=prerelease, dev_count=dev_count, githash=githash)
@@ -602,7 +603,7 @@ class SemanticVersion(object):
         if major is False:
             if os.environ.get('RELEASE_TYPE') == 'major':
                 major = True
-        
+
         if self._prerelease_type:
             new_prerelease_type = self._prerelease_type
             new_prerelease = self._prerelease + 1
@@ -639,8 +640,7 @@ class SemanticVersion(object):
             rpm support)
         :param hash_separator: What separator to use to append the git hash.
         """
-        if ((self._prerelease_type or self._dev_count)
-                and pre_separator is None):
+        if ((self._prerelease_type or self._dev_count) and pre_separator is None):
             segments = [self.decrement().brief_string()]
             pre_separator = "."
         else:
@@ -728,12 +728,12 @@ class Version(str):
 
         result_string = VersionUtils.get_version(package)
         semantic_version = SemanticVersion.from_pip_string(result_string)
-        
-        if os.environ.get('RELEASE_TYPE', False) :
+
+        if os.environ.get('RELEASE_TYPE', False):
             version = str("{0}".format(semantic_version.brief_string()))
         else:
-            version = str("{0}".format(semantic_version.release_string()))        
-        
+            version = str("{0}".format(semantic_version.release_string()))
+
         obj = str.__new__(self, version)
         obj.package = package
         obj.semantic_version = semantic_version
@@ -744,4 +744,4 @@ class Version(str):
         return "Version({0}:{1})".format(self.package, self)
 
 
-__all__ = ['Version', 'VersionUtils']
+__all__ = ['Version', 'VersionUtils', 'SemanticVersion']

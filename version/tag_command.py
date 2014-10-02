@@ -8,10 +8,12 @@ __all__ = ['tag']
 
 VERSION_MATCH = re.compile('^(?P<major>\d\d*)\.(?P<minor>\d*)\.(?P<patch>\d*)($|\.|)(?P<pre_release>[0-9A-Za-z-]*)($|\.g|)(?P<git_id>[0-9A-Za-z-]*)($|\+)(?P<metadata>[0-9A-Za-z-\.]*$)')
 
+
 class tag(Command):
     """ """
     description = "Will add a git tag for the highest defined version increment based on the current version detected"
     user_options = [('remote=', 'r', "Git Remote Name (default: origin)")]
+
     def initialize_options(self):
         self.remote = os.environ.get('GIT_REMOTE', 'origin')
 
@@ -20,20 +22,19 @@ class tag(Command):
         if not VersionUtils.git_is_installed():
             raise Exception('Unable to run git commandline, please make sure git is installed!')
         self.git_dir = VersionUtils.get_git_directory()
-    
+
     def get_tags(self):
         """ """
         tags = VersionUtils.run_git_command(['tag'], self.git_dir)
         return sorted(tags.splitlines())
-        
+
     def has_tag(self, tag_name=None):
         """ """
         for tag in self.get_tags():
             if tag_name == tag:
                 return True
-        
         return False
-    
+
     def run(self):
         """Will tag the currently active git commit id with the next release tag id"""
         sha = VersionUtils.run_git_command(['rev-parse', 'HEAD'], self.git_dir)

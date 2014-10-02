@@ -12,6 +12,7 @@ setup(
     license='MIT',
     keywords='pyversion version versioning packaging',
     packages=find_packages(exclude=['contrib', 'docs', 'pyversion-tests']),
+    tests_require=open("test-requirements.txt").read().splitlines(),
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -24,10 +25,10 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        #'Programming Language :: Python :: 3',
-        #'Programming Language :: Python :: 3.2',
-        #'Programming Language :: Python :: 3.3',
-        #'Programming Language :: Python :: 3.4',
+        # 'Programming Language :: Python :: 3',
+        # 'Programming Language :: Python :: 3.2',
+        # 'Programming Language :: Python :: 3.3',
+        # 'Programming Language :: Python :: 3.4',
     ],
     entry_points={
         'distutils.commands': [
