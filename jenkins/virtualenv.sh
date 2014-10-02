@@ -11,7 +11,7 @@ fi
 pip install --upgrade pip
 pip install --upgrade setuptools
 pip install --upgrade wheel
-
+pip install -r test-requirements.txt
 if [[ -e "./setup.py" ]]
 then
     python setup.py develop
