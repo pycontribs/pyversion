@@ -2,7 +2,7 @@ import os
 import re
 from distutils.core import Command
 from distutils import log as logger
-from .version import Version, VersionUtils
+from .version import Version, SemanticVersion, VersionUtils
 
 __all__ = ['tag']
 
@@ -35,10 +35,48 @@ class tag(Command):
                 return True
         return False
 
+    def increment(self, sem_ver):
+        """Return an incremented SemanticVersion."""
+        if os.environ.get('RELEASE_TYPE') == 'minor':
+            minor = True
+        if os.environ.get('RELEASE_TYPE') == 'major':
+            major = True
+
+        if sem_ver._prerelease_type:
+            new_prerelease_type = sem_ver._prerelease_type
+            new_prerelease = sem_ver._prerelease + 1
+            new_patch = sem_ver._patch
+        else:
+            new_prerelease_type = None
+            new_prerelease = None
+            new_patch = sem_ver._patch + 1
+        if minor:
+            new_minor = sem_ver._minor + 1
+            new_patch = 0
+            new_prerelease_type = None
+            new_prerelease = None
+        else:
+            new_minor = sem_ver._minor
+        if major:
+            new_major = sem_ver._major + 1
+            new_minor = 0
+            new_patch = 0
+            new_prerelease_type = None
+            new_prerelease = None
+        else:
+            new_major = sem_ver._major
+        return SemanticVersion(
+            new_major, new_minor, new_patch,
+            new_prerelease_type, new_prerelease)
+
     def run(self):
         """Will tag the currently active git commit id with the next release tag id"""
         sha = VersionUtils.run_git_command(['rev-parse', 'HEAD'], self.git_dir)
-        tag = Version(self.distribution.get_name())
+        version = os.environ.get("RELEASE_VERSION", None)
+        if not Version:
+            version = Version(self.distribution.get_name())
+        tag = self.increment(version.semantic_version).release_string()
+        
         if self.has_tag(tag):
             logger.info('git tag {0} already exists for this repo, Skipping.'.format(tag))
         else:
