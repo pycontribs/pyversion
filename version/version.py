@@ -3,6 +3,11 @@ from pip._vendor import pkg_resources
 from pip._vendor.packaging.version import parse as parse_version
 from pip._vendor.packaging.version import LegacyVersion
 
+try:
+    import xmlrpclib
+except ImportError:
+    import xmlrpc.client as xmlrpclib
+
 class VersionUtils(object):
     @staticmethod
     def run_shell_command(cmd, throw_on_error=False, buffer=True, env=None):
@@ -135,15 +140,42 @@ class VersionUtils(object):
         return version_string
     
     @staticmethod
+    def get_version_from_pkg_resources(package):
+        try:
+            requirement = pkg_resources.Requirement.parse(package)
+            provider = pkg_resources.get_provider(requirement)
+            return provider.version
+        except:
+            return None
+        
+    @staticmethod
+    def get_version_from_pip(package):
+        # this should handle getting package versions from any pip configured index
+        return None
+        
+    @staticmethod
+    def get_version_from_pypi(package):
+        try:
+            client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
+            versions = client.package_releases(package)
+            if len(versions) >= 1:
+                return versions[0]
+            else:
+                return None
+        except:
+            return None
+    
+    @staticmethod
     def get_version(package):
         version = os.environ.get("RELEASE_VERSION", None)
         if not version:
-            try:
-                requirement = pkg_resources.Requirement.parse(package)
-                provider = pkg_resources.get_provider(requirement)
-                version = provider.version
-            except:
-                version = "0.0.1"
+            version = VersionUtils.get_version_from_pkg_resources(package)
+        if not version:
+            version = VersionUtils.get_version_from_pip(package)
+        if not version:
+            version = VersionUtils.get_version_from_pypi(package)
+        if not version:
+            version = "0.0.1"            
         version = parse_version(version)
         return version
         
@@ -152,3 +184,4 @@ class Version(str):
     '''Proxy for the pip packaging version class'''
     def __new__(self, package):
         return VersionUtils.get_version(package)
+    

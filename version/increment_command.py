@@ -14,4 +14,5 @@ class increment(Command):
         """Will tag the currently active git commit id with the next release tag id"""
         version = VersionUtils.get_version(self.distribution.get_name())
         next_version = VersionUtils.increment(version)
+        os.environ['RELEASE_VERSION'] = str(next_version)
         

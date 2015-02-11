@@ -9,13 +9,13 @@ class TestSemanticVersion(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        self.version = Version('version')
-        self.v1 = parse_version('1!1.2.3')
-        self.v2 = parse_version('1.2.3.dev2.post1')
-        self.v3 = parse_version('1.2.3.a1')
+        cls.version = Version(__project__)
+        cls.v1 = parse_version('1!1.2.3')
+        cls.v2 = parse_version('1.2.3.post2')
+        cls.v3 = parse_version('1.2.3.a1')
     
     def test_version_obj(self):
-        v = Version('version')
+        v = Version(__project__)
         v2 = VersionUtils.increment(v)
         self.assertNotEqual(v, v2)
         self.assertEquals(v, self.version)
