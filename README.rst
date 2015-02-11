@@ -27,9 +27,9 @@ Feeling impatient? I like your style.
         
         __version__ = Version('project-name') #Version will be auto calculated
         
-        python setup.py tag register sdist upload
+        python setup.py increment tag register sdist upload
 
 
 Installation
 ------------
-Download and install using `pip install pyversion` or `easy_install pyversion`
+Download and install using `pip install pyversion`
