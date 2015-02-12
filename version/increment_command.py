@@ -1,18 +1,23 @@
 import os
 import re
-from distutils.core import Command
-from distutils import log as logger
+import setuptools.command.egg_info as orig
 from .version import Version, VersionUtils
 
 __all__ = ['increment']
 
-class increment(Command):
+class increment(orig.egg_info):
     """ """
     description = "Will increment the version indentifier"
-
-    def run(self):
-        """Will tag the currently active git commit id with the next release tag id"""
+    user_options = orig.egg_info.user_options
+    
+    def tagged_version(self):
         version = VersionUtils.get_version(self.distribution.get_name())
         next_version = VersionUtils.increment(version)
-        os.environ['RELEASE_VERSION'] = str(next_version)
+        output = os.environ.get('RELEASE_VERSION', str(next_version))
+        print "Automatically Setting Version to:", output
+        return output
+
+    def run(self):
+        """Will increment the current version number next release version as requested by RELEASE_TYPE"""
+        orig.egg_info.run(self)
         

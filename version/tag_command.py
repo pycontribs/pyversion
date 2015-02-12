@@ -2,13 +2,13 @@ import os
 import re
 from distutils.core import Command
 from distutils import log as logger
-from .version import Version, SemanticVersion, VersionUtils
+from .version import Version, VersionUtils
 
 __all__ = ['tag']
 
 class tag(Command):
     """ """
-    description = "Will add a git tag for the version being released"
+    description = "Will add a git tag corresponding to the version"
     user_options = [('remote=', 'r', "Git Remote Name (default: origin)")]
 
     def initialize_options(self):
@@ -42,6 +42,6 @@ class tag(Command):
         else:
             logger.info('Adding tag {0} for commit {1}'.format(tag, sha))
             if not self.dry_run:
-                VersionUtils.run_git_command(['tag', '-m', '""', '--sign', tag, sha], self.git_dir, throw_on_error=True)
-                logger.info('Pushing tag {0} to remote {1}'.format(tag, self.remote))
-                VersionUtils.run_git_command(['push', self.remote, tag], self.git_dir, throw_on_error=True)
+                pass #VersionUtils.run_git_command(['tag', '-m', '""', '--sign', tag, sha], self.git_dir, throw_on_error=True)
+                #logger.info('Pushing tag {0} to remote {1}'.format(tag, self.remote))
+                #VersionUtils.run_git_command(['push', self.remote, tag], self.git_dir, throw_on_error=True)
