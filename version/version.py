@@ -107,6 +107,8 @@ class VersionUtils(object):
                 post = 1
             else:
                 post += 1
+            if dev:
+                dev = None
         
         if release_type == 'dev':
             if dev is None:
