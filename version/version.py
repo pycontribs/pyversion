@@ -56,8 +56,22 @@ class VersionUtils(object):
         return True
     
     @staticmethod
+    def get_version_number(version_tuple, index=None, default=None, default_name=None):
+        try:
+            rv = version_tuple[index]
+            if isinstance(rv, tuple):
+                return rv
+            else:
+                return default_name, rv
+        except:
+            return default_name, default
+    
+    @staticmethod
     def increment(version):
         """Return an incremented version string."""
+        release_version = os.environ.get("RELEASE_VERSION", None)
+        if release_version is not None:
+            return release_version
         if isinstance(version, LegacyVersion):
             msg = """{0} is considered a legacy version and does not
             support automatic incrementing.  Please bring your version
@@ -67,76 +81,103 @@ class VersionUtils(object):
             raise Exception(msg.format(version))
         release_type = os.environ.get('RELEASE_TYPE', 'micro')
         v = version._version
+        first_pre_release = False
+        # epoch
+        epoch_name, epoch = VersionUtils.get_version_number(v, 0, None, '!')
+        pre_name, pre = VersionUtils.get_version_number(v, 3, None, 'pre')
+        post_name, post = VersionUtils.get_version_number(v, 4, None, 'post')
+        dev_name, dev = VersionUtils.get_version_number(v, 2, None, 'dev')
+        _, major = VersionUtils.get_version_number(v[1], 0, 0)
+        _, minor = VersionUtils.get_version_number(v[1], 1, None)
+        _, micro = VersionUtils.get_version_number(v[1], 2, None)
         
-        # Handle Pre/Post
-        if release_type == 'dev':
-            if v[2] is None:
-                dev = "dev1"
-            else:
-                dev = "dev{0}".format(v[2][1] + 1)
-        else:
-            dev = None
+        # Handle dev/pre/post
         if release_type == 'pre':
-            if v[2] is None:
-                pre = "pre1"
+            if pre is None:
+                pre = 1
+                micro += 1
             else:
-                pre = "pre{0}".format(v[2][1] + 1)
-        else:
-            pre = None
+                pre += 1
+            if post:
+                post = None
+
         if release_type == 'post':
-            if v[2] is None:
-                post = "post1"
+            if post is None:
+                post = 1
             else:
-                post = "post{0}".format(v[2][1] + 1)
-            dev
-        else:
-            post = None
-                
-        # Handle Release
+                post += 1
+        
+        if release_type == 'dev':
+            if dev is None:
+                dev = 1
+            else:
+                dev += 1
+        
         if release_type == 'micro':
-            micro = v[1][2] + 1
+            if micro is None:
+                if minor is None:
+                    minor = 0
+                micro = 1
+            elif pre is None:
+                micro += 1
             dev = None
             pre = None
             post = None
-        else:
-            micro = v[1][2]
+
         if release_type == 'minor':
-            minor = v[1][1] + 1
-            micro = 0
+            if minor is None:
+                minor = 1
+            else:
+                minor += 1
+            if micro is not None:
+                micro = 0
             dev = None
             pre = None
             post = None
-        else:
-            minor = v[1][1]
+
         if release_type == 'major':
-            major = v[1][0] + 1
-            minor = 0
-            micro = 0
+            major += 1
+            if minor is not None:
+                minor = 0
+            if micro is not None:
+                micro = 0
             dev = None
             pre = None
             post = None
-        else:
-            major = v[1][0]
-            
+
         # Handle Epoch
         if release_type == 'epoch':
-            epoch = "{0}!".format(v[0] + 1)
+            epoch += 1
             major = 1
             minor = 0
             micro = 0
             dev = None
             pre = None
             post = None
-        else:
-            epoch = None
         
         local = "".join(v[5] or []) or None
         
-        if release_type in ['epoch', 'major', 'minor', 'micro']:
-            version_list = release = [epoch, major, minor, micro] + [dev, pre, post, local]
-        else:
-            version_list = release = [epoch, major, minor, micro] + list(v[1][3:]) + [dev, pre, post, local]
+        version_list = [major, minor, micro]
+        if release_type not in ['epoch', 'major', 'minor', 'micro', 'pre']:
+            version_list += list(v[1][3:])
         version_string = ".".join([str(x) for x in version_list if x or x == 0])
+        
+        if epoch:
+            version_string = str(epoch) + epoch_name + version_string
+        if pre is not None:
+            if pre_name == 'pre':
+                version_string += '.'
+            version_string +=  pre_name
+            if pre:
+                version_string += str(pre)
+        if post is not None:
+            version_string += '.' + post_name + str(post)    
+        if dev is not None:
+            version_string += '.' + dev_name + str(dev)
+        if local is not None:
+            version_string += '.' + str(local)
+
+
         return version_string
     
     @staticmethod
@@ -167,13 +208,12 @@ class VersionUtils(object):
     
     @staticmethod
     def get_version(package):
-        version = os.environ.get("RELEASE_VERSION", None)
-        if not version:
-            version = VersionUtils.get_version_from_pkg_resources(package)
+        version = VersionUtils.get_version_from_pkg_resources(package)
         if not version:
             version = VersionUtils.get_version_from_pip(package)
         if not version:
             version = VersionUtils.get_version_from_pypi(package)
+        # probably could add a few more methods here to try
         if not version:
             version = "0.0.1"            
         version = parse_version(version)
@@ -184,4 +224,3 @@ class Version(str):
     '''Proxy for the pip packaging version class'''
     def __new__(self, package):
         return VersionUtils.get_version(package)
-    
