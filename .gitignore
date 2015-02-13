@@ -57,3 +57,5 @@ target/
 .DS_Store
 test_output
 coverage_output
+AUTHORS
+ChangeLog

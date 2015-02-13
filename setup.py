@@ -4,4 +4,7 @@ from pbr import util
 import version
 
 os.environ['PBR_VERSION'] = str(version.__version__)
-setup(**util.cfg_to_args())
+setup(
+    setup_requires=['pbr'],
+    **util.cfg_to_args()
+)
