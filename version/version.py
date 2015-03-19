@@ -8,7 +8,8 @@ try:
     import xmlrpclib
 except ImportError:
     import xmlrpc.client as xmlrpclib
-    
+
+
 def version_keyword(dist, attr, value):
     """
     Implements the actual version setup() keyword.
@@ -21,6 +22,7 @@ def version_keyword(dist, attr, value):
     else:
         version = str(Version(dist.metadata.get_name()))
     dist.metadata.version = version
+
 
 class VersionUtils(object):
     @staticmethod
@@ -53,7 +55,7 @@ class VersionUtils(object):
             cmd = [cmd]
         return VersionUtils.run_shell_command(
             ['git', '--git-dir=%s' % git_dir] + cmd, **kwargs)
-    
+
     @staticmethod
     def get_git_directory():
         return VersionUtils.run_shell_command(['git', 'rev-parse', '--git-dir'])
@@ -68,7 +70,7 @@ class VersionUtils(object):
         except OSError:
             return False
         return True
-    
+
     @staticmethod
     def get_version_number(version_tuple, index=None, default=None, default_name=None):
         try:
@@ -79,7 +81,7 @@ class VersionUtils(object):
                 return default_name, rv
         except:
             return default_name, default
-    
+
     @staticmethod
     def increment(version):
         """Return an incremented version string."""
@@ -104,7 +106,7 @@ class VersionUtils(object):
         _, major = VersionUtils.get_version_number(v[1], 0, 0)
         _, minor = VersionUtils.get_version_number(v[1], 1, None)
         _, micro = VersionUtils.get_version_number(v[1], 2, None)
-        
+
         # Handle dev/pre/post
         if release_type == 'pre':
             if pre is None:
@@ -122,13 +124,13 @@ class VersionUtils(object):
                 post += 1
             if dev:
                 dev = None
-        
+
         if release_type == 'dev':
             if dev is None:
                 dev = 1
             else:
                 dev += 1
-        
+
         if release_type == 'micro':
             if micro is None:
                 if minor is None:
@@ -170,14 +172,14 @@ class VersionUtils(object):
             dev = None
             pre = None
             post = None
-        
+
         local = "".join(v[5] or []) or None
-        
+
         version_list = [major, minor, micro]
         if release_type not in ['epoch', 'major', 'minor', 'micro', 'pre']:
             version_list += list(v[1][3:])
         version_string = ".".join([str(x) for x in version_list if x or x == 0])
-        
+
         if epoch:
             version_string = str(epoch) + epoch_name + version_string
         if pre is not None:
@@ -187,15 +189,14 @@ class VersionUtils(object):
             if pre:
                 version_string += str(pre)
         if post is not None:
-            version_string += '.' + post_name + str(post)    
+            version_string += '.' + post_name + str(post)
         if dev is not None:
             version_string += '.' + dev_name + str(dev)
         if local is not None:
             version_string += '.' + str(local)
 
-
         return version_string
-    
+
     @staticmethod
     def get_version_from_pkg_resources(package):
         try:
@@ -204,12 +205,12 @@ class VersionUtils(object):
             return provider.version
         except:
             return None
-        
+
     @staticmethod
     def get_version_from_pip(package):
         # this should handle getting package versions from any pip configured index
         return None
-        
+
     @staticmethod
     def get_version_from_pypi(package):
         try:
@@ -221,7 +222,7 @@ class VersionUtils(object):
                 return None
         except:
             return None
-    
+
     @staticmethod
     def get_version(package):
         version = VersionUtils.get_version_from_pkg_resources(package)
@@ -231,10 +232,10 @@ class VersionUtils(object):
             version = VersionUtils.get_version_from_pypi(package)
         # probably could add a few more methods here to try
         if not version:
-            version = "0.0.1"            
+            version = "0.0.1"
         version = parse_version(version)
         return version
-        
+
 
 class Version(str):
     '''Proxy for the pip packaging version class'''

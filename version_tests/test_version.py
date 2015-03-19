@@ -2,7 +2,7 @@ import os
 import operator
 import unittest2 as unittest
 
-from version import *
+from version.version import Version, VersionUtils, LegacyVersion, parse_version
 
 
 class TestSemanticVersion(unittest.TestCase):

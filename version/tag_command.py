@@ -6,6 +6,7 @@ from .version import Version, VersionUtils
 
 __all__ = ['tag']
 
+
 class tag(Command):
     """ """
     description = "Will add a git tag corresponding to the version"
@@ -36,7 +37,7 @@ class tag(Command):
         """Will tag the currently active git commit id with the next release tag id"""
         sha = VersionUtils.run_git_command(['rev-parse', 'HEAD'], self.git_dir)
         tag = self.distribution.get_version()
-        
+
         if self.has_tag(tag, sha):
             tags_sha = VersionUtils.run_git_command(['rev-parse', tag], self.git_dir)
             if sha != tags_sha:
