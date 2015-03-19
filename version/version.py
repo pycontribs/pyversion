@@ -8,6 +8,19 @@ try:
     import xmlrpclib
 except ImportError:
     import xmlrpc.client as xmlrpclib
+    
+def version_keyword(dist, attr, value):
+    """
+    Implements the actual version setup() keyword.
+    """
+    if value == 'PBR':
+        from pbr.util import cfg_to_args
+        attrs = cfg_to_args()
+        version = str(Version(attrs['name']))
+        os.environ['PBR_VERSION'] = version
+    else:
+        version = str(Version(dist.metadata.get_name()))
+    dist.metadata.version = version
 
 class VersionUtils(object):
     @staticmethod
