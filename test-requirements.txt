@@ -3,5 +3,5 @@ coverage
 nose
 nosexcover
 flake8
-pep8
+pep8<1.6
 pyflakes
