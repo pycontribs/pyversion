@@ -185,7 +185,7 @@ class VersionUtils(object):
         if pre is not None:
             if pre_name == 'pre':
                 version_string += '.'
-            version_string +=  pre_name
+            version_string += pre_name
             if pre:
                 version_string += str(pre)
         if post is not None:

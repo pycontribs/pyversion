@@ -1,4 +1,4 @@
 unittest2
 pytest
 pytest-cov
-pep8
+flake8>=2.3.0

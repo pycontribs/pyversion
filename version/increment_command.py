@@ -1,9 +1,7 @@
 import os
-import re
-import setuptools.command.test as o
 import setuptools.command.egg_info as orig
 from distutils import log as logger
-from .version import Version, VersionUtils
+from .version import VersionUtils
 
 __all__ = ['increment']
 
