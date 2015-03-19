@@ -97,7 +97,6 @@ class VersionUtils(object):
             raise Exception(msg.format(version))
         release_type = os.environ.get('RELEASE_TYPE', 'micro')
         v = version._version
-        first_pre_release = False
         # epoch
         epoch_name, epoch = VersionUtils.get_version_number(v, 0, None, '!')
         pre_name, pre = VersionUtils.get_version_number(v, 3, None, 'pre')
