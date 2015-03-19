@@ -17,7 +17,6 @@ class increment(orig.egg_info):
         orig.egg_info.initialize_options(self)      
         self.release_version = os.environ.get('RELEASE_VERSION', None)
         self.release_type = os.environ.get('RELEASE_TYPE', 'micro')
-        
 
     def finalize_options(self):
         print self.release_version, self.release_type

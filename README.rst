@@ -1,6 +1,6 @@
 Python Version Library
 ======================
-|Status|_ |Downloads|_ |Badge|_ |Egg|_ |Wheel|_ |License|_
+|Downloads|_ |Badge|_ |Egg|_ |Wheel|_ |License|_
 
 .. |Badge| image:: https://pypip.in/v/pyversion/badge.png
 .. _Badge: https://pypi.python.org/pypi/pyversion/
@@ -12,8 +12,6 @@ Python Version Library
 .. _Wheel: https://pypi.python.org/pypi/pyversion/
 .. |License| image:: https://pypip.in/license/pyversion/badge.png
 .. _License: https://pypi.python.org/pypi/pyversion/
-.. |Status| image:: http://jenkins.rocktavious.com/buildStatus/icon?job=pyversion-master
-.. _Status: http://jenkins.rocktavious.com/job/pyversion-master/
 
 Python package versioning made simple
 
@@ -21,14 +19,41 @@ Quickstart
 ----------
 Feeling impatient? I like your style.
 
+In your setup.py file
+
 ::
 
-        from version import Version
+        setup(
+            ...
+            setup_requires = ['pyversion'],
+            auto_version = True,
+            ...
+        )
         
-        __version__ = Version('project-name') #Version will be auto calculated
-        
+
+On the command line
+
+::
+
         python setup.py increment tag register sdist upload
 
+
+PBR
+---
+
+If you are also using the openstack PBR package pyversion supports this as well
+just modify your setup.py file
+
+::
+
+        setup(
+            setup_requires = [
+                'pbr',
+                'pyversion'
+            ],
+            pbr = True,
+            auto_version = "PBR",
+        )
 
 Installation
 ------------
