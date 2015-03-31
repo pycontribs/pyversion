@@ -1,8 +1,8 @@
 import os
 import subprocess
-from pip._vendor import pkg_resources
-from pip._vendor.packaging.version import parse as parse_version
-from pip._vendor.packaging.version import LegacyVersion
+import pkg_resources
+from packaging.version import parse as parse_version
+from packaging.version import LegacyVersion
 
 try:
     import xmlrpclib

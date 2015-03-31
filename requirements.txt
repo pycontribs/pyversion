@@ -1,2 +1,1 @@
-pip>=6.0.8
-pbr
+packaging==15.0

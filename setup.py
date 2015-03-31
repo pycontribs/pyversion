@@ -3,9 +3,9 @@ from setuptools import setup
 
 setup(
     setup_requires=[
-        'pip>=6.0.8',
-        'pbr',
-        'pyversion'
+        'packaging==15.0',
+        'pbr==0.10.7',
+        'pyversion',
     ],
     pbr=True,
     auto_version="PBR",
