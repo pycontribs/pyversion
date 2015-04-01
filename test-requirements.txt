@@ -1,4 +1,4 @@
-unittest2
-pytest
-pytest-cov
-flake8>=2.3.0
+unittest2==1.0.1
+pytest==2.6.4
+pytest-cov==1.8.1
+flake8==2.4.0
