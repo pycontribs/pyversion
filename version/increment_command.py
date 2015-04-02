@@ -18,7 +18,6 @@ class increment(orig.egg_info):
         self.release_type = os.environ.get('RELEASE_TYPE', 'micro')
 
     def finalize_options(self):
-        print self.release_version, self.release_type
         orig.egg_info.finalize_options(self)
 
     def tagged_version(self):

@@ -1,11 +1,8 @@
 import os
 from setuptools import setup
+from pbr import util
 
-setup(
-    setup_requires=[
-        'pbr',
-        'pyversion'
-    ],
-    pbr=True,
-    auto_version="PBR",
-)
+kwargs = util.cfg_to_args()
+kwargs["auto_version"] = "PBR"
+
+setup(**kwargs)
