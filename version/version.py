@@ -3,6 +3,10 @@ import subprocess
 import pkg_resources
 from packaging.version import parse as parse_version
 from packaging.version import LegacyVersion
+from pip.commands.install import InstallCommand
+# disable SSL warnings from the InstallCommand
+from pip._vendor.requests.packages import urllib3
+urllib3.disable_warnings()
 
 try:
     import xmlrpclib
@@ -207,8 +211,19 @@ class VersionUtils(object):
 
     @staticmethod
     def get_version_from_pip(package):
-        # this should handle getting package versions from any pip configured index
-        return None
+        try:
+            c = InstallCommand()
+            options, args = c.parse_args([])
+            index_urls = [options.index_url] + options.extra_index_urls
+            with c._build_session(options) as session:
+                finder = c._build_package_finder(options, index_urls, session)
+            versions = set([data.version for data in finder._find_all_versions(package)])
+            if len(versions) >= 1:
+                return str(max(versions))
+            else:
+                return None
+        except:
+            return None
 
     @staticmethod
     def get_version_from_pypi(package):
