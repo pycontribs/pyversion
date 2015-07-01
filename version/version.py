@@ -4,9 +4,13 @@ import pkg_resources
 from packaging.version import parse as parse_version
 from packaging.version import LegacyVersion
 from pip.commands.install import InstallCommand
-# disable SSL warnings from the InstallCommand
-from pip._vendor.requests.packages import urllib3
-urllib3.disable_warnings()
+
+try:
+    # disable SSL warnings from the InstallCommand
+    from pip._vendor.requests.packages import urllib3
+    urllib3.disable_warnings()
+except:
+    pass
 
 try:
     import xmlrpclib
