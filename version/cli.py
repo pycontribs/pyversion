@@ -1,6 +1,6 @@
-import os
 import sys
 from version import VersionUtils
+
 
 def main():
     args = sys.argv[1:]
