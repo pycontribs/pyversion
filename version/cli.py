@@ -10,5 +10,6 @@ def main():
     else:
         print version
 
+
 if __name__ == "__main__":
     main()
