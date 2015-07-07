@@ -1,6 +1,7 @@
 import os
 import subprocess
 import pkg_resources
+from ConfigParser import SafeConfigParser
 from packaging.version import parse as parse_version
 from packaging.version import LegacyVersion
 from pip.commands.install import InstallCommand
@@ -23,8 +24,17 @@ def version_keyword(dist, attr, value):
     Implements the actual version setup() keyword.
     """
     if value == 'PBR':
-        from pbr.util import cfg_to_args
-        attrs = cfg_to_args()
+        from pbr.util import setup_cfg_to_setup_kwargs
+        path = 'setup.cfg'
+        parser = SafeConfigParser()
+        if not os.path.exists(path):
+            raise ValueError("file '%s' does not exist" %
+                             os.path.abspath(path))
+        parser.read(path)
+        config = {}
+        for section in parser.sections():
+            config[section] = dict(parser.items(section))
+        attrs = setup_cfg_to_setup_kwargs(config)
         version = str(Version(attrs['name']))
         os.environ['PBR_VERSION'] = version
     else:
