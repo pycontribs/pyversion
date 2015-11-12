@@ -253,9 +253,9 @@ class VersionUtils(object):
 
     @staticmethod
     def get_version(package):
-        version = VersionUtils.get_version_from_pkg_resources(package)
+        version = VersionUtils.get_version_from_pip(package)
         if not version:
-            version = VersionUtils.get_version_from_pip(package)
+            version = VersionUtils.get_version_from_pkg_resources(package)
         if not version:
             version = VersionUtils.get_version_from_pypi(package)
         # probably could add a few more methods here to try
