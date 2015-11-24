@@ -1,1 +1,1 @@
-from version import Version # flake8: noqa
+from .version import Version # flake8: noqa
