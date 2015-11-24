@@ -60,3 +60,4 @@ coverage_output
 AUTHORS
 ChangeLog
 flake8.txt
+.eggs
