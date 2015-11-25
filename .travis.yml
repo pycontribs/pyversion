@@ -8,3 +8,5 @@ install:
 script: 
     - "flake8 version/"
     - "py.test --cov-report term --cov version version_tests/"
+after_success:
+  coveralls
