@@ -9,6 +9,10 @@ Python Version Library
     :target: https://travis-ci.org/rocktavious/pyversion
     :alt: Build Status
 
+.. image:: https://coveralls.io/repos/rocktavious/pyversion/badge.svg?branch=master&service=github
+    :target: https://coveralls.io/github/rocktavious/pyversion?branch=master
+    :alt: Coverage
+
 .. image:: https://requires.io/github/rocktavious/pyversion/requirements.svg?branch=master
      :target: https://requires.io/github/rocktavious/pyversion/requirements/?branch=master
      :alt: Requirements Status
