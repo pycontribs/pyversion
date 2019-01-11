@@ -1,16 +1,21 @@
 import os
 import subprocess
 import pkg_resources
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 from packaging.version import parse as parse_version
 from packaging.version import LegacyVersion
-from pip.commands.install import InstallCommand
+from loguru import logger
+# from pip.commands.install import InstallCommand
+#from pip._internal.commands.install import InstallCommand
+from pip._internal.commands.install import InstallCommand
 
 try:
     # disable SSL warnings from the InstallCommand
-    from pip._vendor.requests.packages import urllib3
-    urllib3.disable_warnings()
-except:
+    #from pip._vendor.requests.packages import urllib3
+    #urllib3.disable_warnings()
+    pass
+except Exception as ex:
+    logger.error(f"urllib3 import error: {ex}")
     pass
 
 try:
@@ -23,20 +28,20 @@ def version_keyword(dist, attr, value):
     """
     Implements the actual version setup() keyword.
     """
-    if value == 'PBR':
+    if value == "PBR":
         from pbr.util import setup_cfg_to_setup_kwargs
-        path = 'setup.cfg'
-        parser = SafeConfigParser()
+
+        path = "setup.cfg"
+        parser = ConfigParser()
         if not os.path.exists(path):
-            raise ValueError("file '%s' does not exist" %
-                             os.path.abspath(path))
+            raise ValueError("file '%s' does not exist" % os.path.abspath(path))
         parser.read(path)
         config = {}
         for section in parser.sections():
             config[section] = dict(parser.items(section))
         attrs = setup_cfg_to_setup_kwargs(config)
-        version = str(Version(attrs['name']))
-        os.environ['PBR_VERSION'] = version
+        version = str(Version(attrs["name"]))
+        os.environ["PBR_VERSION"] = version
     else:
         version = str(Version(dist.metadata.get_name()))
     dist.metadata.version = version
@@ -56,27 +61,27 @@ class VersionUtils(object):
         if env:
             newenv.update(env)
 
-        output = subprocess.Popen(cmd,
-                                  stdout=out_location,
-                                  stderr=err_location,
-                                  env=newenv)
+        output = subprocess.Popen(
+            cmd, stdout=out_location, stderr=err_location, env=newenv
+        )
         out = output.communicate()
         if output.returncode and throw_on_error:
             raise Exception("%s returned %d" % (cmd, output.returncode))
         if len(out) == 0 or not out[0] or not out[0].strip():
-            return ''
-        return out[0].strip().decode('utf-8')
+            return ""
+        return out[0].strip().decode("utf-8")
 
     @staticmethod
     def run_git_command(cmd, git_dir, **kwargs):
         if not isinstance(cmd, (list, tuple)):
             cmd = [cmd]
         return VersionUtils.run_shell_command(
-            ['git', '--git-dir=%s' % git_dir] + cmd, **kwargs)
+            ["git", "--git-dir=%s" % git_dir] + cmd, **kwargs
+        )
 
     @staticmethod
     def get_git_directory():
-        return VersionUtils.run_shell_command(['git', 'rev-parse', '--git-dir'])
+        return VersionUtils.run_shell_command(["git", "rev-parse", "--git-dir"])
 
     @staticmethod
     def git_is_installed():
@@ -84,7 +89,7 @@ class VersionUtils(object):
             # We cannot use 'which git' as it may not be available
             # in some distributions, So just try 'git --version'
             # to see if we run into trouble
-            VersionUtils.run_shell_command(['git', '--version'])
+            VersionUtils.run_shell_command(["git", "--version"])
         except OSError:
             return False
         return True
@@ -97,7 +102,8 @@ class VersionUtils(object):
                 return rv
             else:
                 return default_name, rv
-        except:
+        except Exception as err:
+            logger.exception(f"Unexpected exception: {err}")
             return default_name, default
 
     @staticmethod
@@ -113,19 +119,19 @@ class VersionUtils(object):
             automatically incremented.
             """
             raise Exception(msg.format(version))
-        release_type = os.environ.get('RELEASE_TYPE', 'micro')
+        release_type = os.environ.get("RELEASE_TYPE", "micro")
         v = version._version
         # epoch
-        epoch_name, epoch = VersionUtils.get_version_number(v, 0, None, '!')
-        pre_name, pre = VersionUtils.get_version_number(v, 3, None, 'pre')
-        post_name, post = VersionUtils.get_version_number(v, 4, None, 'post')
-        dev_name, dev = VersionUtils.get_version_number(v, 2, None, 'dev')
+        epoch_name, epoch = VersionUtils.get_version_number(v, 0, None, "!")
+        pre_name, pre = VersionUtils.get_version_number(v, 3, None, "pre")
+        post_name, post = VersionUtils.get_version_number(v, 4, None, "post")
+        dev_name, dev = VersionUtils.get_version_number(v, 2, None, "dev")
         _, major = VersionUtils.get_version_number(v[1], 0, 0)
         _, minor = VersionUtils.get_version_number(v[1], 1, None)
         _, micro = VersionUtils.get_version_number(v[1], 2, None)
 
         # Handle dev/pre/post
-        if release_type == 'pre':
+        if release_type == "pre":
             if pre is None:
                 pre = 1
                 micro += 1
@@ -134,7 +140,7 @@ class VersionUtils(object):
             if post:
                 post = None
 
-        if release_type == 'post':
+        if release_type == "post":
             if post is None:
                 post = 1
             else:
@@ -142,13 +148,13 @@ class VersionUtils(object):
             if dev:
                 dev = None
 
-        if release_type == 'dev':
+        if release_type == "dev":
             if dev is None:
                 dev = 1
             else:
                 dev += 1
 
-        if release_type == 'micro':
+        if release_type == "micro":
             if micro is None:
                 if minor is None:
                     minor = 0
@@ -159,7 +165,7 @@ class VersionUtils(object):
             pre = None
             post = None
 
-        if release_type == 'minor':
+        if release_type == "minor":
             if minor is None:
                 minor = 1
             else:
@@ -170,7 +176,7 @@ class VersionUtils(object):
             pre = None
             post = None
 
-        if release_type == 'major':
+        if release_type == "major":
             major += 1
             if minor is not None:
                 minor = 0
@@ -181,7 +187,7 @@ class VersionUtils(object):
             post = None
 
         # Handle Epoch
-        if release_type == 'epoch':
+        if release_type == "epoch":
             epoch += 1
             major = 1
             minor = 0
@@ -193,24 +199,24 @@ class VersionUtils(object):
         local = "".join(v[5] or []) or None
 
         version_list = [major, minor, micro]
-        if release_type not in ['epoch', 'major', 'minor', 'micro', 'pre']:
+        if release_type not in ["epoch", "major", "minor", "micro", "pre"]:
             version_list += list(v[1][3:])
         version_string = ".".join([str(x) for x in version_list if x or x == 0])
 
         if epoch:
             version_string = str(epoch) + epoch_name + version_string
         if pre is not None:
-            if pre_name == 'pre':
-                version_string += '.'
+            if pre_name == "pre":
+                version_string += "."
             version_string += pre_name
             if pre:
                 version_string += str(pre)
         if post is not None:
-            version_string += '.' + post_name + str(post)
+            version_string += "." + post_name + str(post)
         if dev is not None:
-            version_string += '.' + dev_name + str(dev)
+            version_string += "." + dev_name + str(dev)
         if local is not None:
-            version_string += '.' + str(local)
+            version_string += "." + str(local)
 
         return version_string
 
@@ -220,7 +226,8 @@ class VersionUtils(object):
             requirement = pkg_resources.Requirement.parse(package)
             provider = pkg_resources.get_provider(requirement)
             return provider.version
-        except:
+        except Exception as err:
+            print(f"get_version_from_pkg_resources: {err}")
             return None
 
     @staticmethod
@@ -231,24 +238,28 @@ class VersionUtils(object):
             index_urls = [options.index_url] + options.extra_index_urls
             with c._build_session(options) as session:
                 finder = c._build_package_finder(options, index_urls, session)
-            versions = set([data.version for data in finder._find_all_versions(package)])
+            versions = set(
+                [data.version for data in finder._find_all_versions(package)]
+            )
             if len(versions) >= 1:
                 return str(max(versions))
             else:
                 return None
-        except:
+        except Exception as err:
+            logger.exception(f'get_version_from_pip: {err}')
             return None
 
     @staticmethod
     def get_version_from_pypi(package):
         try:
-            client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
-            versions = client.package_releases(package)
-            if len(versions) >= 1:
-                return versions[0]
-            else:
-                return None
-        except:
+            with xmlrpclib.ServerProxy("https://pypi.python.org/pypi") as client:
+                versions = client.package_releases(package)
+                if len(versions) >= 1:
+                    return versions[0]
+                else:
+                    return None
+        except Exception as err:
+            logger.exception(f'get_version_from_pypi: {err}')
             return None
 
     @staticmethod
@@ -266,6 +277,7 @@ class VersionUtils(object):
 
 
 class Version(str):
-    '''Proxy for the pip packaging version class'''
-    def __new__(self, package):
+    """Proxy for the pip packaging version class"""
+
+    def __new__(cls, package):
         return VersionUtils.get_version(package)
