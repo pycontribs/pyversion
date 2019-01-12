@@ -2,22 +2,24 @@ Python Version Library
 ======================
 
 .. image:: https://badge.fury.io/py/pyversion.svg
-    :target: https://badge.fury.io/py/pyversion
+    :target: https://badge.fury.io/py/pyversion3
     :alt: Current Version
-    
-.. image:: https://travis-ci.org/rocktavious/pyversion.svg
-    :target: https://travis-ci.org/rocktavious/pyversion
+
+.. image:: https://travis-ci.org/lingster/pyversion3.svg
+    :target: https://travis-ci.org/lingster/pyversion3
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/rocktavious/pyversion/badge.svg?branch=master&service=github
-    :target: https://coveralls.io/github/rocktavious/pyversion?branch=master
+.. image:: https://coveralls.io/repos/lingster/pyversion3/badge.svg?branch=master&service=github
+    :target: https://coveralls.io/github/lingster/pyversion3?branch=master
     :alt: Coverage
 
-.. image:: https://requires.io/github/rocktavious/pyversion/requirements.svg?branch=master
-     :target: https://requires.io/github/rocktavious/pyversion/requirements/?branch=master
+.. image:: https://requires.io/github/lingster/pyversionr/requirements.svg?branch=master
+     :target: https://requires.io/github/lingster/pyversionr/requirements/?branch=master
      :alt: Requirements Status
 
 Python package versioning made simple
+
+NOTE: this is a fork of the original rocktavious/pyversion. This version has been upgraded to support python3.x
 
 Quickstart
 ----------
@@ -73,4 +75,21 @@ usage:
 
     >>> pyversion <name of your package>
     1.2.3
+
+Developing
+----------
+To develop on this project, please take a fork of then and submit a pull requeest once changes are ready.
+
+This package makes of of pipenv for installing and dependency maintainence.
+If publishing to pypi, rememeber to update requirements.txt and test-requirements.txt as follows:
+
+     pipenv install --dev -ignore-pipfile > requirements.txt
+     pipenv lock --requirements > requirements.txt
+
+Also remember to run tox in the base directory to run black, linter and other tests.
+
+python setup.py sdist bdist_wheelA
+twine upload dist/*
+
+
 
