@@ -14,7 +14,7 @@ Python Version Library
     :alt: Coverage
 
 .. image:: https://requires.io/github/lingster/pyversionr/requirements.svg?branch=master
-     :target: https://requires.io/github/lingster/pyversionr/requirements/?branch=master
+     :target: https://requires.io/github/lingster/pyversion3/requirements/?branch=master
      :alt: Requirements Status
 
 Python package versioning made simple
