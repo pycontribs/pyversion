@@ -5,14 +5,15 @@ from configparser import ConfigParser
 from packaging.version import parse as parse_version
 from packaging.version import LegacyVersion
 from loguru import logger
+
 # from pip.commands.install import InstallCommand
-#from pip._internal.commands.install import InstallCommand
+# from pip._internal.commands.install import InstallCommand
 from pip._internal.commands.install import InstallCommand
 
 try:
     # disable SSL warnings from the InstallCommand
-    #from pip._vendor.requests.packages import urllib3
-    #urllib3.disable_warnings()
+    # from pip._vendor.requests.packages import urllib3
+    # urllib3.disable_warnings()
     pass
 except Exception as ex:
     logger.error(f"urllib3 import error: {ex}")
@@ -106,7 +107,7 @@ class VersionUtils(object):
             logger.exception(f"Unexpected exception: {err}")
             return default_name, default
 
-    @staticmethod
+    @staticmethod  # noqa: C901
     def increment(version):
         """Return an incremented version string."""
         release_version = os.environ.get("RELEASE_VERSION", None)
@@ -132,69 +133,34 @@ class VersionUtils(object):
 
         # Handle dev/pre/post
         if release_type == "pre":
-            if pre is None:
-                pre = 1
-                micro += 1
-            else:
-                pre += 1
-            if post:
-                post = None
+            micro, post, pre = VersionUtils.process_pre(micro, post, pre)
 
         if release_type == "post":
-            if post is None:
-                post = 1
-            else:
-                post += 1
-            if dev:
-                dev = None
+            dev, post = VersionUtils.process_post(dev, post)
 
         if release_type == "dev":
-            if dev is None:
-                dev = 1
-            else:
-                dev += 1
+            dev = VersionUtils.process_dev(dev)
 
         if release_type == "micro":
-            if micro is None:
-                if minor is None:
-                    minor = 0
-                micro = 1
-            elif pre is None:
-                micro += 1
-            dev = None
-            pre = None
-            post = None
+            dev, micro, minor, post, pre = VersionUtils.process_micro(
+                dev, micro, minor, post, pre
+            )
 
         if release_type == "minor":
-            if minor is None:
-                minor = 1
-            else:
-                minor += 1
-            if micro is not None:
-                micro = 0
-            dev = None
-            pre = None
-            post = None
+            dev, micro, minor, post, pre = VersionUtils.process_minor(
+                dev, micro, minor, post, pre
+            )
 
         if release_type == "major":
-            major += 1
-            if minor is not None:
-                minor = 0
-            if micro is not None:
-                micro = 0
-            dev = None
-            pre = None
-            post = None
+            dev, major, micro, minor, post, pre = VersionUtils.process_major(
+                dev, major, micro, minor, post, pre
+            )
 
         # Handle Epoch
         if release_type == "epoch":
-            epoch += 1
-            major = 1
-            minor = 0
-            micro = 0
-            dev = None
-            pre = None
-            post = None
+            dev, epoch, major, micro, minor, post, pre = VersionUtils.process_epoch(
+                dev, epoch, major, micro, minor, post, pre
+            )
 
         local = "".join(v[5] or []) or None
 
@@ -206,11 +172,9 @@ class VersionUtils(object):
         if epoch:
             version_string = str(epoch) + epoch_name + version_string
         if pre is not None:
-            if pre_name == "pre":
-                version_string += "."
-            version_string += pre_name
-            if pre:
-                version_string += str(pre)
+            version_string = VersionUtils.calc_pre_version_string(
+                pre, pre_name, version_string
+            )
         if post is not None:
             version_string += "." + post_name + str(post)
         if dev is not None:
@@ -219,6 +183,93 @@ class VersionUtils(object):
             version_string += "." + str(local)
 
         return version_string
+
+    @staticmethod
+    def calc_pre_version_string(pre, pre_name, version_string):
+        if pre_name == "pre":
+            version_string += "."
+        version_string += pre_name
+        if pre:
+            version_string += str(pre)
+        return version_string
+
+    @staticmethod
+    def process_epoch(dev, epoch, major, micro, minor, post, pre):
+        epoch += 1
+        major = 1
+        minor = 0
+        micro = 0
+        dev = None
+        pre = None
+        post = None
+        return dev, epoch, major, micro, minor, post, pre
+
+    @staticmethod
+    def process_major(dev, major, micro, minor, post, pre):
+        major += 1
+        if minor is not None:
+            minor = 0
+        if micro is not None:
+            micro = 0
+        dev = None
+        pre = None
+        post = None
+        return dev, major, micro, minor, post, pre
+
+    @staticmethod
+    def process_minor(dev, micro, minor, post, pre):
+        if minor is None:
+            minor = 1
+        else:
+            minor += 1
+        if micro is not None:
+            micro = 0
+        dev = None
+        pre = None
+        post = None
+        return dev, micro, minor, post, pre
+
+    @staticmethod
+    def process_micro(dev, micro, minor, post, pre):
+        if micro is None:
+            if minor is None:
+                minor = 0
+            micro = 1
+        elif pre is None:
+            micro += 1
+        dev = None
+        pre = None
+        post = None
+        return dev, micro, minor, post, pre
+
+    @staticmethod
+    def process_dev(dev):
+        if dev is None:
+            dev = 1
+        else:
+            dev += 1
+        return dev
+
+    @staticmethod
+    def process_post(dev, post):
+        if post is None:
+            post = 1
+        else:
+            post += 1
+        if dev:
+            dev = None
+        return dev, post
+
+    @staticmethod
+    def process_pre(micro, post, pre):
+        if pre is None:
+            pre = 1
+            micro += 1
+        else:
+            pre += 1
+        if post:
+            post = None
+        return micro, post, pre
 
     @staticmethod
     def get_version_from_pkg_resources(package):
@@ -246,7 +297,7 @@ class VersionUtils(object):
             else:
                 return None
         except Exception as err:
-            logger.exception(f'get_version_from_pip: {err}')
+            logger.exception(f"get_version_from_pip: {err}")
             return None
 
     @staticmethod
@@ -259,7 +310,7 @@ class VersionUtils(object):
                 else:
                     return None
         except Exception as err:
-            logger.exception(f'get_version_from_pypi: {err}')
+            logger.exception(f"get_version_from_pypi: {err}")
             return None
 
     @staticmethod
