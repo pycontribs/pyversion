@@ -135,27 +135,31 @@ class TestSemanticVersion(unittest.TestCase):
 
     def test_pyversion3_cli(self):
         with self.capture_output() as (out, err):
-            main(['pyversion3'])
+            main(["pyversion3"])
         output = out.getvalue().strip()
         self.assertEqual(output, "0.5.6.dev12")
 
     def test_cli_pypi_package(self):
-        test_package = 'flask-ask'
+        test_package = "flask-ask"
         with self.capture_output() as (out, err):
             main([test_package])
         output = out.getvalue().strip()
-        self.assertEqual(output.split('\n')[0],
-                         f"get_version_from_pkg_resources: The '{test_package}' distribution was not found and is required by the application")
+        self.assertEqual(
+            output.split("\n")[0],
+            f"get_version_from_pkg_resources: The '{test_package}' distribution was not found and is required by the application",
+        )
 
         with self.capture_output() as (out, err):
-            main([test_package, 'increment'])
+            main([test_package, "increment"])
         output_inc = out.getvalue().strip()
-        self.assertEqual(output_inc.split('\n')[1][:-1], output.split('\n')[1][:-1])
+        self.assertEqual(output_inc.split("\n")[1][:-1], output.split("\n")[1][:-1])
 
     def test_unknown_cli(self):
-        test_package = 'unknown_package'
+        test_package = "unknown_package"
         with self.capture_output() as (out, err):
             main([test_package])
         output = out.getvalue().strip()
-        self.assertEqual(output.split('\n')[0],
-                         f"get_version_from_pkg_resources: The '{test_package}' distribution was not found and is required by the application")
+        self.assertEqual(
+            output.split("\n")[0],
+            f"get_version_from_pkg_resources: The '{test_package}' distribution was not found and is required by the application",
+        )
