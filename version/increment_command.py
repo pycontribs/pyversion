@@ -18,10 +18,8 @@ class increment(orig.egg_info):
             "The Release Version to override to NOTE: no increment will happen (default: None)",
         ),
     ]
-
-    def __init__(self):
-        self.release_version = os.environ.get("RELEASE_VERSION", None)
-        self.release_type = os.environ.get("RELEASE_TYPE", "micro")
+    release_version = os.environ.get("RELEASE_VERSION", None)
+    release_type = os.environ.get("RELEASE_TYPE", "micro")
 
     def initialize_options(self):
         orig.egg_info.initialize_options(self)
