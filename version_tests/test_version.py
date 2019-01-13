@@ -133,12 +133,6 @@ class TestSemanticVersion(unittest.TestCase):
         finally:
             sys.stdout, sys.stderr = old_out, old_err
 
-    def test_pyversion3_cli(self):
-        with self.capture_output() as (out, err):
-            main(["pyversion3"])
-        output = out.getvalue().strip()
-        self.assertEqual(output, "0.5.6.dev12")
-
     def test_cli_pypi_package(self):
         test_package = "flask-ask"
         with self.capture_output() as (out, err):
