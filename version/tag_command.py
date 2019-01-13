@@ -1,6 +1,6 @@
 import os
 from distutils.core import Command
-from distutils import log as logger
+from loguru import logger
 from .version3 import VersionUtils
 
 __all__ = ["tag"]

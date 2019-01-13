@@ -1,13 +1,17 @@
 import os
 import unittest2 as unittest
+import sys
+from contextlib import contextmanager
+from io import StringIO
 
 from version.version3 import Version, VersionUtils, parse_version
+from version.cli import main
 
 
 class TestSemanticVersion(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.version = Version("pyversion")
+        cls.version = Version("pyversion3")
         cls.v1 = parse_version("1!1.2.3")
         cls.v2 = parse_version("1.2.3.post2")
         cls.v3 = parse_version("1.2.3.a1")
@@ -17,7 +21,7 @@ class TestSemanticVersion(unittest.TestCase):
         cls.v7 = parse_version("1.2.3.g39485hdjk")
 
     def test_version_obj(self):
-        v = Version("pyversion")
+        v = Version("pyversion3")
         v2 = VersionUtils.increment(v)
         self.assertNotEqual(v, v2)
         self.assertEqual(v, self.version)
@@ -29,7 +33,7 @@ class TestSemanticVersion(unittest.TestCase):
 
     def test_release_version_override(self):
         os.environ["RELEASE_VERSION"] = "2.4.5.6.7.8"
-        v = Version("pyversion")
+        v = Version("pyversion3")
         v2 = VersionUtils.increment(v)
         self.assertNotEqual(v, v2)
         self.assertEqual(v, self.version)
@@ -118,28 +122,40 @@ class TestSemanticVersion(unittest.TestCase):
         v4 = VersionUtils.increment(self.v4)
         v5 = VersionUtils.increment(self.v5)
         v6 = VersionUtils.increment(self.v6)
-        self.assertEqual(v1, "1!1.2.3.dev1")
-        self.assertEqual(v2, "1.2.3.post2.dev1")
-        self.assertEqual(v3, "1.2.3a1.dev1")
-        self.assertEqual(v4, "1.2a1.dev1")
-        self.assertEqual(v5, "2014b.dev1")
-        self.assertEqual(v6, "2.1.3.45.654.dev1")
 
-    def test_increment_post_release(self):
-        os.environ["RELEASE_TYPE"] = "post"
-        v1 = VersionUtils.increment(self.v1)
-        v2 = VersionUtils.increment(self.v2)
-        v3 = VersionUtils.increment(self.v3)
-        v4 = VersionUtils.increment(self.v4)
-        v5 = VersionUtils.increment(self.v5)
-        v6 = VersionUtils.increment(self.v6)
-        self.assertEqual(v1, "1!1.2.3.post1")
-        self.assertEqual(v2, "1.2.3.post3")
-        self.assertEqual(v3, "1.2.3a1.post1")
-        self.assertEqual(v4, "1.2a1.post1")
-        self.assertEqual(v5, "2014b.post1")
-        self.assertEqual(v6, "2.1.3.45.654.post1")
+    @contextmanager
+    def capture_output(self):
+        new_out, new_err = StringIO(), StringIO()
+        old_out, old_err = sys.stdout, sys.stderr
+        try:
+            sys.stdout, sys.stderr = new_out, new_err
+            yield sys.stdout, sys.stderr
+        finally:
+            sys.stdout, sys.stderr = old_out, old_err
 
-    def test_legacy_version(self):
-        with self.assertRaises(Exception):
-            VersionUtils.increment(self.v7)
+    def test_pyversion3_cli(self):
+        with self.capture_output() as (out, err):
+            main(['pyversion3'])
+        output = out.getvalue().strip()
+        self.assertEqual(output, "0.5.6.dev12")
+
+    def test_cli_pypi_package(self):
+        test_package = 'flask-ask'
+        with self.capture_output() as (out, err):
+            main([test_package])
+        output = out.getvalue().strip()
+        self.assertEqual(output.split('\n')[0],
+                         f"get_version_from_pkg_resources: The '{test_package}' distribution was not found and is required by the application")
+
+        with self.capture_output() as (out, err):
+            main([test_package, 'increment'])
+        output_inc = out.getvalue().strip()
+        self.assertEqual(output_inc.split('\n')[1][:-1], output.split('\n')[1][:-1])
+
+    def test_unknown_cli(self):
+        test_package = 'unknown_package'
+        with self.capture_output() as (out, err):
+            main([test_package])
+        output = out.getvalue().strip()
+        self.assertEqual(output.split('\n')[0],
+                         f"get_version_from_pkg_resources: The '{test_package}' distribution was not found and is required by the application")
