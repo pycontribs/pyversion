@@ -1,7 +1,7 @@
 Python Version Library
 ======================
 
-.. image:: https://badge.fury.io/py/pyversion.svg
+.. image:: https://badge.fury.io/py/pyversion3.svg
     :target: https://badge.fury.io/py/pyversion3
     :alt: Current Version
 
@@ -16,6 +16,10 @@ Python Version Library
 .. image:: https://requires.io/github/lingster/pyversionr/requirements.svg?branch=master
      :target: https://requires.io/github/lingster/pyversion3/requirements/?branch=master
      :alt: Requirements Status
+
+.. image:: https://snyk.io/test/github/lingster/pyversion3
+     :target: https://synk.io/github/lingster/pyversion3
+     :alt: Vulnerabililtes Status
 
 Python package versioning made simple
 
@@ -88,8 +92,15 @@ If publishing to pypi, rememeber to update requirements.txt and test-requirement
 
 Also remember to run tox in the base directory to run black, linter and other tests.
 
-python setup.py sdist bdist_wheelA
-twine upload dist/*
+You can also run `tox` to perform black formatting, linting and testing. 
+`tox -e testrelease` will release and upload test.pypi.org
+`tox -e release` will release to pypi a new version 
+
+Travis is in use for CI, so you can also run: `travis-lint .travis.yml`
+
+Or use the below to manully upload:
+`python setup.py sdist bdist_wheel
+twine upload dist/*`
 
 
 
