@@ -9,7 +9,7 @@ Python Version Library
     :target: https://travis-ci.org/lingster/pyversion3
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/lingster/pyversion3/badge.svg?branch=master&service=github
+.. image:: https://coveralls.io/repos/github/lingster/pyversion3/badge.svg?branch=master
     :target: https://coveralls.io/github/lingster/pyversion3?branch=master
     :alt: Coverage
 
@@ -35,7 +35,7 @@ In your setup.py file
 
     setup(
         ...
-        setup_requires = ['pyversion'],
+        setup_requires = ['pyversion3'],
         auto_version = True,
         ...
     )
@@ -58,7 +58,7 @@ just modify your setup.py file
     setup(
         setup_requires = [
             'pbr',
-            'pyversion'
+            'pyversion3'
         ],
         pbr = True,
         auto_version = "PBR",
@@ -66,7 +66,7 @@ just modify your setup.py file
 
 Installation
 ------------
-Download and install using `pip install pyversion`
+Download and install using `pip install pyversion3`
 
 CLI
 ---
@@ -77,7 +77,7 @@ usage:
 
 .. code-block:: bash
 
-    >>> pyversion <name of your package>
+    >>> pyversion3 <name of your package>
     1.2.3
 
 Developing
@@ -93,7 +93,10 @@ If publishing to pypi, rememeber to update requirements.txt and test-requirement
 Also remember to run tox in the base directory to run black, linter and other tests.
 
 You can also run `tox` to perform black formatting, linting and testing. 
-`tox -e testrelease` will release and upload test.pypi.org
+To test build and upload to test.pypi.org use:
+`tox -e testrelease`
+
+To build and upload to production use:
 `tox -e release` will release to pypi a new version 
 
 Travis is in use for CI, so you can also run: `travis-lint .travis.yml`
@@ -101,6 +104,5 @@ Travis is in use for CI, so you can also run: `travis-lint .travis.yml`
 Or use the below to manully upload:
 `python setup.py sdist bdist_wheel
 twine upload dist/*`
-
 
 
