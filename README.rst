@@ -13,13 +13,13 @@ Python Version Library
     :target: https://coveralls.io/github/lingster/pyversion3?branch=master
     :alt: Coverage
 
- .. image:: https://requires.io/github/lingster/pyversion3/requirements.svg?branch=master
-      :target: https://requires.io/github/lingster/pyversion3/requirements/?branch=master
-           :alt: Requirements Status
+.. image:: https://requires.io/github/lingster/pyversion3/requirements.svg?branch=master
+    :target: https://requires.io/github/lingster/pyversion3/requirements/?branch=master
+    :alt: Requirements Status
 
-.. image:: https://snyk.io/test/github/lingster/pyversion3?targetFile=requirements.txt
-     :target: https://snyk.io/test/github/lingster/pyversion3?targetFile=requirements.txt
-     :alt: Vulnerabililtes Status
+.. image:: https://snyk.io/test/github/lingster/pyversion3/badge.svg?targetFile=requirements.txt
+    :target: https://snyk.io/test/github/lingster/pyversion3?targetFile=requirements.txt
+    :alt: Vulnerabililtes Status
 
 Python package versioning made simple
 
@@ -50,7 +50,7 @@ On the command line
 PBR
 ---
 
-If you are also using the openstack PBR package pyversion supports this as well
+If you are also using the openstack PBR package pyversion3 supports this as well
 just modify your setup.py file
 
 .. code-block:: python
