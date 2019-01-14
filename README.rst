@@ -13,12 +13,12 @@ Python Version Library
     :target: https://coveralls.io/github/lingster/pyversion3?branch=master
     :alt: Coverage
 
-.. image:: https://requires.io/github/lingster/pyversionr/requirements.svg?branch=master
-     :target: https://requires.io/github/lingster/pyversion3/requirements/?branch=master
-     :alt: Requirements Status
+ .. image:: https://requires.io/github/lingster/pyversion3/requirements.svg?branch=master
+      :target: https://requires.io/github/lingster/pyversion3/requirements/?branch=master
+           :alt: Requirements Status
 
-.. image:: https://snyk.io/test/github/lingster/pyversion3
-     :target: https://synk.io/github/lingster/pyversion3
+.. image:: https://snyk.io/test/github/lingster/pyversion3?targetFile=requirements.txt
+     :target: https://snyk.io/test/github/lingster/pyversion3?targetFile=requirements.txt
      :alt: Vulnerabililtes Status
 
 Python package versioning made simple
