@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+tox = "*"
+pytest = ">=2.8.3"
+flake8 = ">=2.5.0"
+unittest2 = ">=1.1.0"
+pytest-cov = ">=2.2.0"
+
+[packages]
+coveralls = ">=1.1"
+packaging = "*"
+pbr = "*"
+loguru = "*"
+
+[requires]
+python_version = "3.6"
