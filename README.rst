@@ -21,6 +21,14 @@ Python Version Library
     :target: https://snyk.io/test/github/pycontribs/pyversion?targetFile=requirements.txt
     :alt: Vulnerabililtes Status
 
+.. image:: https://pyup.io/repos/github/pycontribs/pyversion/shield.svg
+     :target: https://pyup.io/repos/github/pycontribs/pyversion/
+     :alt: Updates
+     
+.. image:: https://pyup.io/repos/github/pycontribs/pyversion/python-3-shield.svg
+     :target: https://pyup.io/repos/github/pycontribs/pyversion/
+     :alt: Python 3
+
 Python package versioning made simple
 
 NOTE: this is a fork of the original rocktavious/pyversion. This version has been upgraded to support python3.x
