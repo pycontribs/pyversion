@@ -5,20 +5,20 @@ Python Version Library
     :target: https://badge.fury.io/py/pyversion3
     :alt: Current Version
 
-.. image:: https://travis-ci.org/lingster/pyversion3.svg
-    :target: https://travis-ci.org/lingster/pyversion3
+.. image:: https://travis-ci.org/pycontribs/pyversion.svg
+    :target: https://travis-ci.org/pycontribs/pyversion
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/github/lingster/pyversion3/badge.svg?branch=master
-    :target: https://coveralls.io/github/lingster/pyversion3?branch=master
+.. image:: https://coveralls.io/repos/github/pycontribs/pyversion/badge.svg?branch=master
+    :target: https://coveralls.io/github/pycontribs/pyversion?branch=master
     :alt: Coverage
 
-.. image:: https://requires.io/github/lingster/pyversion3/requirements.svg?branch=master
-    :target: https://requires.io/github/lingster/pyversion3/requirements/?branch=master
+.. image:: https://requires.io/github/pycontribs/pyversion3/requirements.svg?branch=master
+    :target: https://requires.io/github/pycontribs/pyversion3/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://snyk.io/test/github/lingster/pyversion3/badge.svg?targetFile=requirements.txt
-    :target: https://snyk.io/test/github/lingster/pyversion3?targetFile=requirements.txt
+.. image:: https://snyk.io/test/github/pycontribs/pyversion/badge.svg?targetFile=requirements.txt
+    :target: https://snyk.io/test/github/pycontribs/pyversion?targetFile=requirements.txt
     :alt: Vulnerabililtes Status
 
 Python package versioning made simple
