@@ -3,7 +3,7 @@ ansimarkup==1.4.0
 better-exceptions-fork==0.2.1.post6
 certifi==2018.11.29
 chardet==3.0.4
-colorama==0.4.1 ; sys_platform == 'win32'
+colorama==0.4.1 
 coverage==5.0a4
 coveralls==1.5.1
 docopt==0.6.2

@@ -1,5 +1,5 @@
 import sys
-from version.version3 import VersionUtils
+from version.version import VersionUtils
 
 
 def main(args):

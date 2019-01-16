@@ -4,14 +4,14 @@ import sys
 from contextlib import contextmanager
 from io import StringIO
 
-from version.version3 import Version, VersionUtils, parse_version
+from version.version import Version, VersionUtils, parse_version
 from version.cli import main
 
 
 class TestSemanticVersion(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.version = Version("pyversion3")
+        cls.version = Version("pyversion")
         cls.v1 = parse_version("1!1.2.3")
         cls.v2 = parse_version("1.2.3.post2")
         cls.v3 = parse_version("1.2.3.a1")
@@ -21,7 +21,7 @@ class TestSemanticVersion(unittest.TestCase):
         cls.v7 = parse_version("1.2.3.g39485hdjk")
 
     def test_version_obj(self):
-        v = Version("pyversion3")
+        v = Version("pyversion")
         v2 = VersionUtils.increment(v)
         self.assertNotEqual(v, v2)
         self.assertEqual(v, self.version)
@@ -33,7 +33,7 @@ class TestSemanticVersion(unittest.TestCase):
 
     def test_release_version_override(self):
         os.environ["RELEASE_VERSION"] = "2.4.5.6.7.8"
-        v = Version("pyversion3")
+        v = Version("pyversion")
         v2 = VersionUtils.increment(v)
         self.assertNotEqual(v, v2)
         self.assertEqual(v, self.version)

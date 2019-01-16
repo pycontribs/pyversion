@@ -1,8 +1,8 @@
 Python Version Library
 ======================
 
-.. image:: https://badge.fury.io/py/pyversion3.svg
-    :target: https://badge.fury.io/py/pyversion3
+.. image:: https://badge.fury.io/py/pyversion.svg
+    :target: https://badge.fury.io/py/pyversion
     :alt: Current Version
 
 .. image:: https://travis-ci.org/pycontribs/pyversion.svg
@@ -13,8 +13,8 @@ Python Version Library
     :target: https://coveralls.io/github/pycontribs/pyversion?branch=master
     :alt: Coverage
 
-.. image:: https://requires.io/github/pycontribs/pyversion3/requirements.svg?branch=master
-    :target: https://requires.io/github/pycontribs/pyversion3/requirements/?branch=master
+.. image:: https://requires.io/github/pycontribs/pyversion/requirements.svg?branch=master
+    :target: https://requires.io/github/pycontribs/pyversion/requirements/?branch=master
     :alt: Requirements Status
 
 .. image:: https://snyk.io/test/github/pycontribs/pyversion/badge.svg?targetFile=requirements.txt
@@ -43,7 +43,7 @@ In your setup.py file
 
     setup(
         ...
-        setup_requires = ['pyversion3'],
+        setup_requires = ['pyversion'],
         auto_version = True,
         ...
     )
@@ -58,7 +58,7 @@ On the command line
 PBR
 ---
 
-If you are also using the openstack PBR package pyversion3 supports this as well
+If you are also using the openstack PBR package pyversion supports this as well
 just modify your setup.py file
 
 .. code-block:: python
@@ -66,7 +66,7 @@ just modify your setup.py file
     setup(
         setup_requires = [
             'pbr',
-            'pyversion3'
+            'pyversion'
         ],
         pbr = True,
         auto_version = "PBR",
@@ -74,7 +74,7 @@ just modify your setup.py file
 
 Installation
 ------------
-Download and install using `pip install pyversion3`
+Download and install using `pip install pyversion`
 
 CLI
 ---
@@ -85,7 +85,7 @@ usage:
 
 .. code-block:: bash
 
-    >>> pyversion3 <name of your package>
+    >>> pyversion <name of your package>
     1.2.3
 
 Developing

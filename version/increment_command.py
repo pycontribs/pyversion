@@ -1,7 +1,7 @@
 import os
 import setuptools.command.egg_info as orig
 from loguru import logger
-from .version3 import VersionUtils
+from .version import VersionUtils
 
 __all__ = ["increment"]
 
