@@ -1,5 +1,5 @@
 import os
-import unittest2 as unittest
+import unittest as unittest
 import sys
 from contextlib import contextmanager
 from io import StringIO
