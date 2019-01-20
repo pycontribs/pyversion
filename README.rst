@@ -18,7 +18,7 @@ Python Version Library
     :alt: Requirements Status
 
 .. image:: https://snyk.io/test/github/pycontribs/pyversion/badge.svg?targetFile=requirements.txt
-    :target: https://snyk.io/test/github/pycontribs/pyversion?targetFile=requirements.txt
+    :target: https://snyk.io/test/github/pycontribs/pyversion/badge.svg?targetFile=requirements.txt
     :alt: Vulnerabililtes Status
 
 .. image:: https://pyup.io/repos/github/pycontribs/pyversion/shield.svg
