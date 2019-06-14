@@ -10,7 +10,7 @@ docopt==0.6.2
 idna==2.8
 loguru==0.2.4
 packaging==18.0
-pbr==5.1.1
+pbr==5.3.0
 pygments==2.3.1
 pyparsing==2.3.1
 requests==2.21.0
