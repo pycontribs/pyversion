@@ -15,5 +15,5 @@ pytest-cov==2.6.1
 pytest==4.1.1
 six==1.12.0
 toml==0.10.0
-tox==3.7.0
+tox==3.13.1
 virtualenv==16.2.0
