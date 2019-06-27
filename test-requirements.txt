@@ -6,7 +6,7 @@ coverage==5.0a4
 filelock==3.0.10
 flake8==3.6.0
 mccabe==0.6.1
-more-itertools==5.0.0
+more-itertools==7.1.0
 pluggy==0.8.1
 py==1.7.0
 pycodestyle==2.4.0
