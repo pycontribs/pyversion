@@ -11,7 +11,7 @@ idna==2.8
 loguru==0.2.4
 packaging==19.0
 pbr==5.1.1
-pygments==2.3.1
+pygments==2.4.2
 pyparsing==2.3.1
 requests==2.21.0
 six==1.12.0
