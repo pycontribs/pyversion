@@ -1,4 +1,4 @@
--i https://pypi.org/simple
+-i https://pypi.org/simple/
 ansimarkup==1.4.0
 better-exceptions-fork==0.2.1.post6
 certifi==2019.6.16
@@ -12,7 +12,7 @@ pbr==5.3.1
 loguru==0.3.0
 packaging==19.0
 pygments==2.4.2
-pyparsing==2.3.1
+pyparsing==2.4.0
 requests==2.22.0
 six==1.12.0
-urllib3>=1.24.2
+urllib3==1.24.2
