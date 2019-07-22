@@ -5,7 +5,7 @@ colorama==0.4.1
 filelock==3.0.12
 coverage==5.0a5
 filelock==3.0.10
-flake8==3.7.7
+flake8==3.7.8
 mccabe==0.6.1
 pycodestyle==2.5.0
 more-itertools==7.1.0
