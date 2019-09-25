@@ -1,6 +1,6 @@
 ansimarkup==1.4.0
 better-exceptions-fork==0.2.1.post6
-certifi==2019.6.16
+certifi==2019.9.11
 chardet==3.0.4
 colorama==0.4.1
 coverage==4.5.3
