@@ -12,10 +12,10 @@ packaging==19.2
 pbr==5.4.0
 pipenv==2018.11.26
 pkg-resources==0.0.0
-Pygments==2.4.2
+Pygments==2.7.4
 pyparsing==2.4.0
 requests==2.22.0
 six==1.12.0
-urllib3==1.25.6
+urllib3==1.26.5
 virtualenv==16.6.1
 virtualenv-clone==0.5.3
